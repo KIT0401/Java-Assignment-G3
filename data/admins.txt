@@ -1,2 +1,2 @@
-id,username,password,role,ic,email,contact_number,address
-1,kit,kit,student,0,0,0,0
+id,
+1,
