@@ -1,0 +1,6 @@
+id,username,password,active,role,ic,email,contact_number,address
+string,string,string,boolean,string,string,string,string,string
+1,admin,admin,true,admin,null,null,null,null
+2,receptionist,receptionist,true,receptionist,null,null,null,null
+3,tutor,tutor,true,tutor,null,null,null,null
+4,student,student,true,student,null,null,null,null
