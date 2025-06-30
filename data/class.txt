@@ -1,0 +1,3 @@
+id,subject_name,class_type,student_level,cos,week,time,class_mode,active,teacher
+1,sad,Lecture,Level 1,12,Monday,13.00-14.00,Online,true,KJ
+1,qwfw,Lecture,Level 1,123.45,Friday,13.00-14.00,Online,true,KJ

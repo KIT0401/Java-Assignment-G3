@@ -1,10 +1,16 @@
 package frontend;
 
+import backend.datamanager;
 import backend.tutor;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Tutor_UI extends JFrame {
     private JLabel WelcomeTitle;
@@ -13,6 +19,25 @@ public class Tutor_UI extends JFrame {
     private JButton LogOutButton;
     private JPanel Frame;
     private JPanel TutorPanel;
+    private JButton AddClassButton;
+    private JPanel UpdateProfileFrame;
+    private JPanel AddClassFrame;
+    private JTextField SubTextBox;
+    private JTextField SubjectFeeTextField;
+    private JComboBox ModeBox;
+    private JPanel subject;
+    private JComboBox StudentLevelBox;
+    private JPanel level;
+    private JButton createButton;
+    private JComboBox WeekBox;
+    private JComboBox TimeBox;
+    private JComboBox ClassTypeBox;
+    private JLabel checkSub;
+    private JLabel checkType;
+    private JLabel checkLevel;
+    private JLabel checkCos;
+    private JLabel checkSchedule;
+    private JLabel checkMode;
 
     private static tutor TUTOR;
 
@@ -24,6 +49,8 @@ public class Tutor_UI extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
         setResizable(false);
+        AddClassFrame.setVisible(false);
+        UpdateProfileFrame.setVisible(false);
 
         LogOutButton.addActionListener(new ActionListener() {
             @Override
@@ -33,6 +60,162 @@ public class Tutor_UI extends JFrame {
                 if (result == 0) {
                     dispose();
                     Login_UI UI = new Login_UI();
+                }
+            }
+        });
+
+        AddClassButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AddClassFrame.setVisible(true);
+                UpdateProfileFrame.setVisible(false);
+            }
+        });
+
+        UpdateProfileButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AddClassFrame.setVisible(false);
+                UpdateProfileFrame.setVisible(true);
+            }
+        });
+
+// add option to class mode box
+        ModeBox.setModel(new DefaultComboBoxModel<>(new String[]{
+                "< None >", "Online", "Physical", "Hybrid"
+        }));
+
+// add option to student level box
+        StudentLevelBox.setModel(new DefaultComboBoxModel<>(new String[]{
+                "< None >", "Level 1", "Level 2 ", "Level 3"
+        }));
+
+// add option to Week box
+        WeekBox.setModel(new DefaultComboBoxModel<>(new String[]{
+            "< Week >", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+        }));
+
+// add option to time box (is that need to create a function that tutor or admin can add new time by themself?)
+        TimeBox.setModel(new DefaultComboBoxModel<>(new String[]{
+            "< Time >", "8.00-10.00", "10.00-12.00", "13.00-14.00", "14.00-16.00", "16.00-18.00"
+        }));
+
+// add option to class type box
+        ClassTypeBox.setModel(new DefaultComboBoxModel<>(new String[]{
+            "< Class Type >","Lecture","Tutorial", "Lab"
+        }));
+// set the word to gray and disappear when user type
+        SubTextBox.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (SubTextBox.getText().equals("Enter Subject Name")){
+                    SubTextBox.setText("");
+                    SubTextBox.setForeground(Color.BLACK);
+                }
+            }
+
+        });
+        SubTextBox.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (SubTextBox.getText().isEmpty()){
+                    SubTextBox.setText("Enter Subject Name");
+                    SubTextBox.setForeground(Color.LIGHT_GRAY);
+                }
+
+            }
+        });
+
+// set the word to gray and disappear when user type
+        SubjectFeeTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (SubjectFeeTextField.getText().equals("e.g. 20.50")){
+                    SubjectFeeTextField.setText("");
+                    SubjectFeeTextField.setForeground(Color.BLACK);
+                }
+            }
+        });
+        SubjectFeeTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (SubjectFeeTextField.getText().isEmpty()){
+                    SubjectFeeTextField.setText("e.g. 20.50");
+                    SubjectFeeTextField.setForeground(Color.LIGHT_GRAY);
+                }
+            }
+        });
+
+
+        createButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkSub.setText("");
+                checkLevel.setText("");
+                checkCos.setText("");
+                checkType.setText("");
+                checkMode.setText("");
+                checkSchedule.setText("");
+
+                boolean pass = true;
+
+                if (SubTextBox.getText().equals("Enter Subject Name")){
+                    checkSub.setText("*");
+                    pass = false;
+                }
+
+                if ("< Class Type >".equals(ClassTypeBox.getSelectedItem())){
+                    checkType.setText("*");
+                    pass = false;
+                }
+
+                if ("< None >".equals(StudentLevelBox.getSelectedItem())){
+                    checkLevel.setText("*");
+                    pass = false;
+                }
+
+                if (SubjectFeeTextField.getText().equals("e.g. 20.50") || !SubjectFeeTextField.getText().matches("^\\d+(\\.\\d{1,2})?$")){
+                    checkCos.setText("*");
+                    pass = false;
+                }
+
+                if ("< Week >".equals(WeekBox.getSelectedItem()) || "< Time >".equals(TimeBox.getSelectedItem())){
+                    checkSchedule.setText("*");
+                    pass =false;
+                }
+
+                if ("< None >".equals(ModeBox.getSelectedItem())){
+                    checkMode.setText("*");
+                    pass = false;
+                }
+
+                if (pass){
+                    String Subject = SubTextBox.getText();
+                    String Class_type = (String) ClassTypeBox.getSelectedItem();
+                    String Student_level = (String) StudentLevelBox.getSelectedItem();
+                    String Cos = SubjectFeeTextField.getText();
+                    String Week = (String) WeekBox.getSelectedItem();
+                    String Time = (String) TimeBox.getSelectedItem();
+                    String Mode_Class = (String) ModeBox.getSelectedItem();
+                    String Status = "true" ;
+                    String Teacher = TUTOR.getUsername();
+
+                    ArrayList<Object> newClass = new ArrayList<>(Arrays.asList(
+                            Subject,
+                            Class_type,
+                            Student_level,
+                            Cos,
+                            Week,
+                            Time,
+                            Mode_Class,
+                            Status,
+                            Teacher
+                    ));
+
+                    datamanager.addData("class.txt",newClass);
+                    JOptionPane.showMessageDialog(null, "Create Successful");
+                }else {
+                    JOptionPane.showMessageDialog(null, "Create Unsuccessful");
                 }
             }
         });
