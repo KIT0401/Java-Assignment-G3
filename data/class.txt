@@ -1,3 +1,4 @@
-id,subject_name,class_type,student_level,cos,week,time,class_mode,active,teacher
+id,subject_name,class_type,student_level,cost,week,time,class_mode,active,teacher
+string,string,string,string,string,string,string,string,boolean,string
 1,sad,Lecture,Level 1,12,Monday,13.00-14.00,Online,true,KJ
-1,qwfw,Lecture,Level 1,123.45,Friday,13.00-14.00,Online,true,KJ
+2,qwfw,Lecture,Level 1,123.45,Friday,13.00-14.00,Online,true,KJ

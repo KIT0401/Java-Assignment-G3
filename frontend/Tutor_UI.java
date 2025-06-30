@@ -225,4 +225,8 @@ public class Tutor_UI extends JFrame {
         TUTOR = system;
         WelcomeTitle.setText("Hello, " + TUTOR.getUsername() + " !");
     }
+
+    public static void main(String[] args) {
+        Tutor_UI ui = new Tutor_UI();
+    }
 }
