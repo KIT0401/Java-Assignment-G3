@@ -248,8 +248,6 @@ public class Admin_UI extends JFrame {
         SaveButton.setVisible(false);
     }
 
-
-
     public static void main(String[] args) {
         Admin_UI UI = new Admin_UI();
     }

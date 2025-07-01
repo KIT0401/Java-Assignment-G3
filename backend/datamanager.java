@@ -18,15 +18,17 @@ public class datamanager {
 
         // deleteData("users.txt","1");
 
-        Object username;
+//        Object username;
+//
+//        ArrayList<Object> data = getData("users.txt","1");
+//
+//        System.out.println(data);
+//
+//        username = data.get(5);
+//
+//        System.out.println(username);
 
-        ArrayList<Object> data = getData("users.txt","1");
-
-        System.out.println(data);
-
-        username = data.get(5);
-
-        System.out.println(username);
+        // System.out.println(loadData("users.txt"));
 
     }
     public static void addData(String filename, ArrayList<Object> data) {
@@ -188,6 +190,31 @@ public class datamanager {
         return data;
     }
 
+    public static ArrayList<String> loadData(String filename) {
+        ArrayList<String> data = new ArrayList<>();
+
+        File file_location = getFileLocation(filename).toFile();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file_location))) {
+            reader.readLine();
+            reader.readLine();
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+
+                    data.add(line.trim());
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error reading file: " + e.getMessage());
+        }
+
+        return data;
+    }
+
     public boolean login(String username, String password){
         try (BufferedReader reader = new BufferedReader(new FileReader(getFileLocation("users.txt").toFile()))) {
             String line;
@@ -301,4 +328,5 @@ public class datamanager {
 
         return id;
     }
+
 }
