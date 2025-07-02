@@ -31,10 +31,11 @@ public class datamanager {
         // System.out.println(loadData("users.txt"));
 
     }
-    public static void addData(String filename, ArrayList<Object> data) {
+    public static String addData(String filename, ArrayList<Object> data) {
         File file_location = getFileLocation(filename).toFile();
 
-        data.addFirst(generateID(filename));
+        int newID = generateID(filename);
+        data.addFirst(newID);
 
         String string_data = data.subList(0, data.size())
                 .stream()
@@ -46,6 +47,24 @@ public class datamanager {
         } catch (IOException e) {
             System.out.println("Error adding file: " + e.getMessage());
         }
+
+        return String.valueOf(newID);
+    }
+
+    public static void addLine(String filename, ArrayList<Object> data) {
+        File file_location = getFileLocation(filename).toFile();
+
+        String string_data = data.subList(0, data.size())
+                .stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file_location,true))) {
+            writer.write(string_data + "\n");
+        } catch (IOException e) {
+            System.out.println("Error adding file: " + e.getMessage());
+        }
+
     }
 
     public static void updateData(String filename, ArrayList<Object> data) {
