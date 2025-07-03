@@ -4,6 +4,7 @@ import backend.datamanager;
 import backend.tutor;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,6 +39,23 @@ public class Tutor_UI extends JFrame {
     private JLabel checkCos;
     private JLabel checkSchedule;
     private JLabel checkMode;
+    private JTextField UserNameText;
+    private JTextField PasswordText;
+    private JTextField ICText;
+    private JTextField EmailText;
+    private JTextField ContactNumberText;
+    private JTextField AddressText;
+    private JLabel ShowUserName;
+    private JLabel ShowPassword;
+    private JLabel ShowEmail;
+    private JLabel ShowContactNumber;
+    private JLabel ShowAddress;
+    private JButton SaveButton;
+    private JButton EditButton;
+    private JLabel ShowIC;
+    private JButton EditClassButton;
+    private JPanel EditClassFrame;
+    private JTable EditTable;
 
     private static tutor TUTOR;
 
@@ -69,6 +87,7 @@ public class Tutor_UI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 AddClassFrame.setVisible(true);
                 UpdateProfileFrame.setVisible(false);
+                EditClassFrame.setVisible(false);
             }
         });
 
@@ -77,6 +96,19 @@ public class Tutor_UI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 AddClassFrame.setVisible(false);
                 UpdateProfileFrame.setVisible(true);
+                SaveButton.setVisible(false);
+                EditClassFrame.setVisible(false);
+                UpdateProfile();
+            }
+        });
+
+        EditClassButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AddClassFrame.setVisible(false);
+                UpdateProfileFrame.setVisible(false);
+                EditClassFrame.setVisible(true);
+                insert_data_table();
             }
         });
 
@@ -193,7 +225,7 @@ public class Tutor_UI extends JFrame {
                     String Subject = SubTextBox.getText();
                     String Class_type = (String) ClassTypeBox.getSelectedItem();
                     String Student_level = (String) StudentLevelBox.getSelectedItem();
-                    String Cos = SubjectFeeTextField.getText();
+                    Double Cos = Double.parseDouble(SubjectFeeTextField.getText());
                     String Week = (String) WeekBox.getSelectedItem();
                     String Time = (String) TimeBox.getSelectedItem();
                     String Mode_Class = (String) ModeBox.getSelectedItem();
@@ -218,8 +250,149 @@ public class Tutor_UI extends JFrame {
                     JOptionPane.showMessageDialog(null, "Create Unsuccessful");
                 }
             }
+
         });
+        EditButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (SaveButton.isVisible()){
+                    EditButton.setText("Edit");
+                    SaveButton.setVisible(false);
+                }else {
+                    EditButton.setText("Cancel");
+                    SaveButton.setVisible(true);
+                }
+                UpdateProfile();
+            }
+        });
+        SaveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = UserNameText.getText();
+                String password = PasswordText.getText();
+                String ic = ICText.getText();
+                String contact_number = ContactNumberText.getText();
+                String email = EmailText.getText();
+                String address = AddressText.getText();
+
+                TUTOR.UpdateProfile(username, password, ic, email, contact_number, address);
+                JOptionPane.showMessageDialog(null, "Update Successful");
+
+                SaveButton.setVisible(false);
+                EditButton.setText("Edit");
+                UpdateProfile();
+            }
+        });
+
+
+
     }
+
+    public void UpdateProfile(){
+
+        String username = TUTOR.getUsername();
+        String password = TUTOR.getPassword();
+        String ic = TUTOR.getIc();
+        String email = TUTOR.getEmail();
+        String contact_number = TUTOR.getContact_number();
+        String address = TUTOR.getAddress();
+
+        if (SaveButton.isVisible()){
+
+            UserNameText.setText(username);
+
+            PasswordText.setText(password);
+
+            if (ic.equals("null")){
+                ICText.setText("");
+            } else {
+                ICText.setText(ic);
+            }
+
+            if (email.equals("null")){
+                EmailText.setText("");
+            } else {
+                EmailText.setText(email);
+            }
+
+            if (contact_number.equals("null")){
+                ContactNumberText.setText("");
+            } else {
+                ContactNumberText.setText(contact_number);
+            }
+
+            if (address.equals("null")){
+                AddressText.setText("");
+            } else {
+                AddressText.setText(address);
+            }
+
+            ShowUserName.setVisible(false);
+            ShowPassword.setVisible(false);
+            ShowIC.setVisible(false);
+            ShowEmail.setVisible(false);
+            ShowContactNumber.setVisible(false);
+            ShowAddress.setVisible(false);
+
+            UserNameText.setVisible(true);
+            PasswordText.setVisible(true);
+            ICText.setVisible(true);
+            EmailText.setVisible(true);
+            ContactNumberText.setVisible(true);
+            AddressText.setVisible(true);
+
+        } else {
+
+            ShowUserName.setText(username);
+
+            ShowPassword.setText("*".repeat(password.length()));
+
+            ShowIC.setText("----");
+
+            ShowEmail.setText("----");
+
+            ShowAddress.setText("----");
+
+            if (contact_number.equals("null")){
+                ShowContactNumber.setText("----");
+            } else {
+                String blur = blur_ph_number();
+                ShowContactNumber.setText(blur);
+            }
+
+            ShowUserName.setVisible(true);
+            ShowPassword.setVisible(true);
+            ShowIC.setVisible(true);
+            ShowEmail.setVisible(true);
+            ShowContactNumber.setVisible(true);
+            ShowAddress.setVisible(true);
+
+            UserNameText.setVisible(false);
+            PasswordText.setVisible(false);
+            ICText.setVisible(false);
+            EmailText.setVisible(false);
+            ContactNumberText.setVisible(false);
+            AddressText.setVisible(false);
+        }
+    }
+
+public String blur_ph_number(){
+    String ph_number = TUTOR.getContact_number();
+
+    String First3 = ph_number.substring(0,3);
+    String Last2 = ph_number.substring(ph_number.length() -2);
+    String blur = "*".repeat(ph_number.length()-5);
+    String result = First3 + blur + Last2;
+
+    return result;
+}
+
+public void insert_data_table(){
+    DefaultTableModel tableModel =(DefaultTableModel) EditTable.getModel();
+    String [] element = {"Class ID", "Class Name","Class type", "Lecture", "Student Level", "Week", "Time", "Class Mode" };
+    tableModel.setColumnIdentifiers(element);
+
+}
 
     public void Run(tutor system){
         TUTOR = system;
@@ -229,4 +402,6 @@ public class Tutor_UI extends JFrame {
     public static void main(String[] args) {
         Tutor_UI ui = new Tutor_UI();
     }
+
+
 }
