@@ -3,7 +3,11 @@ package backend;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class datamanager {
@@ -11,6 +15,9 @@ public class datamanager {
 //        ArrayList<Object> newLine = new ArrayList<>(Arrays.asList("kit8qw123123eq", "kit81123123231"));
 //
 //        addData("users.txt", newLine);
+
+//         ArrayList<Object> newLine = new ArrayList<>(Arrays.asList("test", "test"));
+//         addData("students.txt", newLine);
 
 //        ArrayList<Object> newLine = new ArrayList<>(Arrays.asList(1, "kit", "kit"));
 //
@@ -30,11 +37,41 @@ public class datamanager {
 
         // System.out.println(loadData("users.txt"));
 
+        // deleteData("students.txt","10");
+
     }
-    public static void addData(String filename, ArrayList<Object> data) {
+    public static String addData(String filename, ArrayList<Object> data) {
         File file_location = getFileLocation(filename).toFile();
 
-        data.addFirst(generateID(filename));
+        boolean haveActive = false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file_location))) {
+            String[] parts = reader.readLine().trim().split(",");
+
+            for (String attribute : parts) {
+                if (attribute.equalsIgnoreCase("active")) {
+                    haveActive = true;
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading file: " + e.getMessage());
+        }
+
+        int newID;
+
+        if (haveActive) {
+            newID = generateID(filename);
+        } else {
+            ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Singapore"));
+            int timePart = now.getHour() * 100 + now.getMinute();
+
+            newID = timePart * 1000 + new Random().nextInt(1000);
+        }
+
+        data.addFirst(newID);
+
+        System.out.println(newID);
 
         String string_data = data.subList(0, data.size())
                 .stream()
@@ -46,6 +83,24 @@ public class datamanager {
         } catch (IOException e) {
             System.out.println("Error adding file: " + e.getMessage());
         }
+
+        return String.valueOf(newID);
+    }
+
+    public static void addLine(String filename, ArrayList<Object> data) {
+        File file_location = getFileLocation(filename).toFile();
+
+        String string_data = data.subList(0, data.size())
+                .stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file_location,true))) {
+            writer.write(string_data + "\n");
+        } catch (IOException e) {
+            System.out.println("Error adding file: " + e.getMessage());
+        }
+
     }
 
     public static void updateData(String filename, ArrayList<Object> data) {
@@ -91,20 +146,21 @@ public class datamanager {
         File file_location = getFileLocation(filename).toFile();
 
         ArrayList<String> data_lines = new ArrayList<>();
+
         String first_line;
+        String second_line_type;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file_location))) {
             String line;
 
             first_line = reader.readLine();
-            reader.readLine();
+            second_line_type = reader.readLine();
 
             String[] first_line_split = first_line.trim().split(",");
 
             while ((line = reader.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
                     String[] parts = line.trim().split(",");
-
                     if (parts[0].equals(id)) {
                         int active_index = 0;
 
@@ -114,7 +170,6 @@ public class datamanager {
                                 break;
                             }
                         }
-
                         if (active_index != 0) {
                             parts[active_index] = String.valueOf(false);
                             data_lines.add(String.join(",", parts));
@@ -130,9 +185,9 @@ public class datamanager {
             return;
         }
 
-        System.out.println(data_lines);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file_location))) {
             writer.write(first_line + "\n");
+            writer.write(second_line_type + "\n");
 
             for (String i : data_lines) {
                 writer.write(i + "\n");

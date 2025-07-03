@@ -15,6 +15,8 @@ public class Login_UI extends JFrame {
     private JPanel LoginPanel;
     private JLabel Title;
 
+    int Attempts;
+
     datamanager dt = new datamanager();
 
     public Login_UI() {
@@ -26,6 +28,8 @@ public class Login_UI extends JFrame {
         setVisible(true);
         setResizable(false);
 
+        Attempts = 3;
+
         logInButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -35,7 +39,16 @@ public class Login_UI extends JFrame {
                     dispose();
                     //JOptionPane.showMessageDialog(null,"Login Successful");
                 } else {
-                    JOptionPane.showMessageDialog(null,"Invalid Username Or Password");
+                    Attempts -= 1;
+
+                    if (Attempts < 0) {
+                        dispose();
+                        JOptionPane.showMessageDialog(null,
+                                "Login failed. You have exceeded the maximum number of attempts."
+                        );
+                    } else {
+                        JOptionPane.showMessageDialog(null,"Invalid Username Or Password");
+                    }
                 }
             }
         });
