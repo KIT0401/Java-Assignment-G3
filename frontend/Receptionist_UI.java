@@ -1,10 +1,13 @@
 package frontend;
 
+import backend.datamanager;
 import backend.receptionist;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class Receptionist_UI extends JFrame {
     private JPanel ReceptionistPanel;
@@ -92,6 +95,7 @@ public class Receptionist_UI extends JFrame {
                 AddStudentDetails.setVisible(false);
                 StudentPayment.setVisible(false);
                 UpdateProfile.setVisible(false);
+                loadTableData();
             }
         });
         AddStudentButton.addActionListener(new ActionListener() {
@@ -150,6 +154,7 @@ public class Receptionist_UI extends JFrame {
                 AddressField.setVisible(false);
                 EmailField.setVisible(false);
                 ContactField.setVisible(false);
+                UpdateProfile();
             }
         });
     }
@@ -158,8 +163,24 @@ public class Receptionist_UI extends JFrame {
 
     }
 
-    public void Run(receptionist system){
-        RECEPTIONIST = system;
-        WelcomeTitle.setText("Hello, " + RECEPTIONIST.getUsername() + " !");
+    public void loadTableData() {
+        String[] columnName = {"Name", "IC", "Email", "Contact Number", "Address", "Level", "Subjects", "Date of Enrolment"};
+        DefaultTableModel model = new DefaultTableModel(columnName, 0);
+
+        ArrayList<String> users = datamanager.loadData("users.txt");
+        ArrayList<String> studentSubjects = datamanager.loadData("student_subjects.txt");
+        for (String subjectLine : studentSubjects) {
+            String[] subject_parts = subjectLine.split(",");
+
+        }
+
+    }
+    public void Run (receptionist system){
+            RECEPTIONIST = system;
+            WelcomeTitle.setText("Hello, " + RECEPTIONIST.getUsername() + " !");
+    }
+
+    public static void main (String[] args){
+            Receptionist_UI ui = new Receptionist_UI();
     }
 }
