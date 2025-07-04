@@ -4,10 +4,13 @@ import backend.admin;
 import backend.datamanager;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Admin_UI extends JFrame {
     private JPanel AdminPanel;
@@ -41,8 +44,15 @@ public class Admin_UI extends JFrame {
     private JTable ReceptionistTable;
     private JButton EditReceptionistButton;
     private JButton DeleteReceptionistButton;
-    private JLabel ShowTutorID;
+    private JLabel ShowReceptionistID;
     private JTextField ReceptionistPasswordField;
+    private JButton SaveReceptionistButton;
+    private JComboBox comboBox1;
+    private JRadioButton malayRadioButton;
+    private JButton DeleteTutorButton;
+    private JButton EditTutorButton;
+    private JButton AddTutorButton;
+    private JButton SaveTutorButton;
 
     private DefaultTableModel model;
 
@@ -63,7 +73,8 @@ public class Admin_UI extends JFrame {
         ProfileFrame.setVisible(false);
 
         SaveButton.setVisible(false);
-        DeleteReceptionistButton.setVisible(false);
+        DeleteReceptionistButton.setVisible(true);
+        EditReceptionistButton.setVisible(true);
 
         LogOutButton.addActionListener(new ActionListener() {
             @Override
@@ -159,6 +170,25 @@ public class Admin_UI extends JFrame {
             }
         });
 
+        ReceptionistTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    int selectedRow = ReceptionistTable.getSelectedRow();
+
+                    if (selectedRow != -1) {
+//                        String id = model.getValueAt(selectedRow, 0).toString();
+//                        String name = model.getValueAt(selectedRow, 1).toString();
+//                        String dept = model.getValueAt(selectedRow, 2).toString();
+//                        System.out.println(id + name + dept);
+
+                        EditReceptionistButton.setVisible(true);
+                        DeleteReceptionistButton.setVisible(true);
+                    }
+                }
+            }
+        });
+
         AddReceptionistButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -170,25 +200,89 @@ public class Admin_UI extends JFrame {
 
                 if (result.getFirst().equals(true)) {
                     model.addRow(new Object[]{result.get(2), ReceptionistUsernameField.getText(), ReceptionistPasswordField.getText()});
-                    // Select the newly added row
+
                     int newRow = model.getRowCount() - 1;
                     ReceptionistTable.setRowSelectionInterval(newRow, newRow);
                     ReceptionistTable.scrollRectToVisible(ReceptionistTable.getCellRect(newRow, 0, true));
+
+                    ShowReceptionistID.setText(result.get(2).toString());
+
+                    SaveReceptionistButton.setVisible(true);
+                    DeleteReceptionistButton.setVisible(true);
+                    EditReceptionistButton.setVisible(true);
                 }
 
                 JOptionPane.showMessageDialog(null, result.get(1));
             }
         });
+
         EditReceptionistButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                int selectedRow = ReceptionistTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    String id = model.getValueAt(selectedRow, 0).toString();
+                    String username = model.getValueAt(selectedRow, 1).toString();
+                    String password = model.getValueAt(selectedRow, 2).toString();
 
+                    ShowReceptionistID.setText(id);
+                    ReceptionistUsernameField.setText(username);
+                    ReceptionistPasswordField.setText(password);
+
+                } else {
+                    JOptionPane.showMessageDialog(null,"Please select a row first!");
+                }
             }
         });
+
         DeleteReceptionistButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                int selectedRow = ReceptionistTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    String id = model.getValueAt(selectedRow, 0).toString();
+                    String username = model.getValueAt(selectedRow, 1).toString();
+                    // String password = model.getValueAt(selectedRow, 2).toString();
 
+                    int result = JOptionPane.showConfirmDialog(null,"Are you sure want delete "+ username +"?","Confirm",JOptionPane.YES_NO_OPTION);
+
+                    if (result == 0) {
+                        boolean result2 = ADMIN.deleteReceptionist(id);
+
+                        if (result2) {
+                            for (int i = 0; i < model.getRowCount(); i++) {
+                                String rowId = model.getValueAt(i, 0).toString();
+                                if (Objects.equals(rowId, id)) {
+                                    model.removeRow(i);
+
+                                    if (ShowReceptionistID.getText().equalsIgnoreCase(id)) {
+                                        ShowReceptionistID.setText("---");
+                                        ReceptionistUsernameField.setText("");
+                                        ReceptionistPasswordField.setText("");
+                                    }
+
+                                    JOptionPane.showMessageDialog(null,"Successful Deleted Receptionist " + username + "'s Data");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null,"Please select a row and press edit button first!");
+                }
+            }
+        });
+
+        SaveReceptionistButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!ShowReceptionistID.getText().equalsIgnoreCase("---")) {
+                    if (ADMIN.saveReceptionist(ShowReceptionistID.getText(),ReceptionistUsernameField.getText(),ReceptionistPasswordField.getText())) {
+                        JOptionPane.showMessageDialog(null,"Successful Saved Receptionist ID" + ShowReceptionistID.getText() + "'s Data");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null,"Please select an row and press edit button first.");
+                }
             }
         });
     }

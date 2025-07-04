@@ -86,8 +86,25 @@ public class admin extends user {
     }
 
     public boolean deleteReceptionist(String id) {
-
+        datamanager.deleteData("users.txt",id);
         return true;
     }
 
+    public boolean saveReceptionist(String id, String username, String password) {
+        ArrayList<Object> oldData = datamanager.getData("users.txt",id);
+
+        datamanager.updateData("users.txt",new ArrayList<>(Arrays.asList(
+                id,
+                username,
+                password,
+                oldData.get(3),
+                oldData.get(4),
+                oldData.get(5),
+                oldData.get(6),
+                oldData.get(7),
+                oldData.get(8)
+        )));
+
+        return true;
+    }
 }
