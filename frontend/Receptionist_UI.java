@@ -71,6 +71,10 @@ public class Receptionist_UI extends JFrame {
     private JTextField studentcontactnumberfield;
     private JTextField studentaddressfield;
     private JScrollPane scrollPane;
+    private JButton StudentSubjectRequest;
+    private JButton EditStudentButton;
+    private JPanel checkboxPanel;
+    private JButton cancelButton;
 
     private static receptionist RECEPTIONIST;
 
@@ -121,6 +125,88 @@ public class Receptionist_UI extends JFrame {
                 AddStudentDetails.setVisible(true);
                 StudentPayment.setVisible(false);
                 UpdateProfile.setVisible(false);
+            }
+        });
+        EditStudentButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = studentTable.getSelectedRow();
+
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(null, "Please select a row from the table first.");
+                    return;
+                }
+
+                String studentID = studentTable.getValueAt(selectedRow, 0).toString();
+                String studentName = studentTable.getValueAt(selectedRow, 1).toString();
+                String [] studentSubjects = studentTable.getValueAt(selectedRow, 3).toString().split(",");
+                ArrayList<Object> userData = datamanager.getData("users.txt", studentID);
+                ArrayList<Object> studentData = datamanager.getData("students.txt", studentID);
+
+                TestLabel.setVisible(false);
+                StudentDetailTable.setVisible(false);
+                AddStudentDetails.setVisible(true);
+                StudentPayment.setVisible(false);
+                UpdateProfile.setVisible(false);
+
+                showstudentid.setText(studentID);
+                studentnamefield.setText(studentName);
+
+                if (userData.get(2) == null || userData.get(2).equals("null")) {
+                    studentpasswordfield.setText("");
+                } else {
+                    studentpasswordfield.setText(userData.get(2).toString());
+                }
+
+                if (userData.get(5) == null || userData.get(5).equals("null")) {
+                    studenticfield.setText("");
+                } else {
+                    studenticfield.setText(userData.get(2).toString());
+                }
+
+                if (userData.get(6) == null || userData.get(6).equals("null")) {
+                    studentemailfield.setText("");
+                } else {
+                    studentemailfield.setText(userData.get(2).toString());
+                }
+
+                if (userData.get(7) == null || userData.get(7).equals("null")) {
+                    studentcontactnumberfield.setText("");
+                } else {
+                    studentcontactnumberfield.setText(userData.get(2).toString());
+                }
+
+                if (userData.get(8) == null || userData.get(8).equals("null")) {
+                    studentaddressfield.setText("");
+                } else {
+                    studentaddressfield.setText(userData.get(2).toString());
+                }
+
+                studentlevel.setSelectedItem(studentData.get(1).toString());
+
+                malayCheckBox.setSelected(false);
+                chineseCheckBox.setSelected(false);
+                englishCheckBox.setSelected(false);
+                scienceCheckBox.setSelected(false);
+                mathematicsCheckBox.setSelected(false);
+
+                for (String subject : studentSubjects){
+                    subject = subject.trim().toLowerCase();
+
+                    if (subject.equals("malay")){
+                        malayCheckBox.setSelected(true);
+                    } else if (subject.equals("chinese")){
+                        chineseCheckBox.setSelected(true);
+                    } else if (subject.equals("english")){
+                        englishCheckBox.setSelected(true);
+                    } else if (subject.equals("science")){
+                        scienceCheckBox.setSelected(true);
+                    } else if (subject.equals("mathematics")){
+                        mathematicsCheckBox.setSelected(true);
+                    }
+                }
+
+//                checkboxPanel
             }
         });
         StudentPaymentButton.addActionListener(new ActionListener() {
@@ -261,16 +347,10 @@ public class Receptionist_UI extends JFrame {
 
                     String student_new_id = datamanager.addData("users.txt",userData);
 
-                    int total_fees = 0;
-
-                    for (Object each_subject : subjects) {
-                        total_fees += 100;
-                    }
-
                     ArrayList<Object> student_Data = new ArrayList<>(Arrays.asList(
                             student_new_id,
                             selected_level,
-                            total_fees,
+                            subjects.size() * 100,
                             0
                     ));
 
@@ -278,12 +358,10 @@ public class Receptionist_UI extends JFrame {
                     System.out.println(student_Data);
 
                     for (Object each_subject : subjects) {
-
                         String currentMonth = LocalDate.now()
                                 .getMonth()
                                 .getDisplayName(TextStyle.FULL, Locale.ENGLISH)
                                 .toLowerCase();
-
                         System.out.println("Current month: " + currentMonth);
 
                         ArrayList<Object> subject_Data = new ArrayList<>(Arrays.asList(
@@ -295,9 +373,62 @@ public class Receptionist_UI extends JFrame {
                         datamanager.addData("student_subjects.txt",subject_Data);
                         System.out.println(subject_Data);
                     }
+                    JOptionPane.showMessageDialog(null, "Student successfully added!");
                 } else {
+                    String studentID = showstudentid.getText();
 
-                }
+                    ArrayList<Object> userData = new ArrayList<>(Arrays.asList(
+                            username,
+                            password,
+                            true,
+                            "student",
+                            ic,
+                            email,
+                            contact_number,
+                            address
+                    ));
+
+                    datamanager.updateData("users.txt", userData);
+
+                    ArrayList<Object> studentData = new ArrayList<>(Arrays.asList(
+                            studentID,
+                            selected_level,
+                            subjects.size() * 100,
+                            0
+                    ));
+
+                    datamanager.updateData("students.txt", studentData);
+
+
+
+                    JOptionPane.showMessageDialog(null, "Student successfully updated!");
+                    }
+                TestLabel.setVisible(false);
+                StudentDetailTable.setVisible(true);
+                AddStudentDetails.setVisible(false);
+                StudentPayment.setVisible(false);
+                UpdateProfile.setVisible(false);
+                loadTableData();
+            }
+        });
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AddStudentDetails.setVisible(false);
+                StudentDetailTable.setVisible(true);
+
+                showstudentid.setText("---");
+                studentnamefield.setText("");
+                studentpasswordfield.setText("");
+                studentaddressfield.setText("");
+                studentcontactnumberfield.setText("");
+                studentemailfield.setText("");
+                studenticfield.setText("");
+                malayCheckBox.setSelected(false);
+                chineseCheckBox.setSelected(false);
+                englishCheckBox.setSelected(false);
+                scienceCheckBox.setSelected(false);
+                mathematicsCheckBox.setSelected(false);
             }
         });
     }
