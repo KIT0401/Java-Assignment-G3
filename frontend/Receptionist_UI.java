@@ -5,9 +5,16 @@ import backend.receptionist;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
 
 public class Receptionist_UI extends JFrame {
     private JPanel ReceptionistPanel;
@@ -17,12 +24,12 @@ public class Receptionist_UI extends JFrame {
     private JButton LogOutButton;
     private JButton ManageStudentButton;
     private JButton StudentPaymentButton;
-    private JTable table1;
+    private JTable studentTable;
     private JTextField textField1;
     private JTextField studentPaymentTextField;
     private JPanel AddStudentDetails;
-    private JTextField textField2;
-    private JComboBox comboBox1;
+    private JTextField studentnamefield;
+    private JComboBox studentlevel;
     private JCheckBox malayCheckBox;
     private JCheckBox chineseCheckBox;
     private JCheckBox englishCheckBox;
@@ -57,6 +64,13 @@ public class Receptionist_UI extends JFrame {
     private JLabel AddressField;
     private JLabel EmailField;
     private JLabel ContactField;
+    private JLabel showstudentid;
+    private JTextField studentpasswordfield;
+    private JTextField studenticfield;
+    private JTextField studentemailfield;
+    private JTextField studentcontactnumberfield;
+    private JTextField studentaddressfield;
+    private JScrollPane scrollPane;
 
     private static receptionist RECEPTIONIST;
 
@@ -68,6 +82,7 @@ public class Receptionist_UI extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
         setResizable(false);
+        studentTable.getTableHeader().setReorderingAllowed(false);
 
         TestLabel.setVisible(false);
         StudentDetailTable.setVisible(false);
@@ -157,6 +172,134 @@ public class Receptionist_UI extends JFrame {
                 UpdateProfile();
             }
         });
+
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = studentnamefield.getText();
+                String password = studentpasswordfield.getText();
+                String address = studentaddressfield.getText();
+                String contact_number = studentcontactnumberfield.getText();
+                String email = studentemailfield.getText();
+                String ic = studenticfield.getText();
+                String selected_level = studentlevel.getSelectedItem().toString();
+
+                ArrayList<String> subjects = new ArrayList<>();
+
+                if (malayCheckBox.isSelected()) {
+                    subjects.add("malay");
+                }
+                if (chineseCheckBox.isSelected()) {
+                    subjects.add("chinese");
+                }
+                if (englishCheckBox.isSelected()) {
+                    subjects.add("english");
+                }
+                if (scienceCheckBox.isSelected()) {
+                    subjects.add("science");
+                }
+                if (mathematicsCheckBox.isSelected()) {
+                    subjects.add("mathematics");
+                }
+
+                if (subjects.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please select at least one subject.");
+                    return;
+                }
+                if (subjects.size() > 3) {
+                    JOptionPane.showMessageDialog(null, "You can only select up to 3 subjects.");
+                    return;
+                }
+
+                if (showstudentid.getText().equalsIgnoreCase("---")) {
+
+                    if (username.isEmpty()) {
+                        JOptionPane.showMessageDialog(null,"Username cannot be empty");
+                        return ;
+                    }
+
+                    for (String each : datamanager.loadData("users.txt")) {
+                        String [] afterSplit = each.split(",");
+
+                        if (afterSplit[1].equalsIgnoreCase(username)){
+                            JOptionPane.showMessageDialog(null,"This username already exists!");
+                            return;
+                        }
+                    }
+
+                    if (password.isEmpty()) {
+                        JOptionPane.showMessageDialog(null,"Password cannot be empty");
+                        return;
+                    }
+
+                    if (ic.isEmpty()) {
+                        ic = "null";
+                    }
+
+                    if (address.isEmpty()) {
+                        address = "null";
+                    }
+
+                    if (contact_number.isEmpty()) {
+                        contact_number = "null";
+                    }
+
+                    if (email.isEmpty()) {
+                        email = "null";
+                    }
+
+                    ArrayList<Object> userData = new ArrayList<>(Arrays.asList(
+                            username,
+                            password,
+                            true,
+                            "student",
+                            ic,
+                            email,
+                            contact_number,
+                            address
+                    ));
+
+                    String student_new_id = datamanager.addData("users.txt",userData);
+
+                    int total_fees = 0;
+
+                    for (Object each_subject : subjects) {
+                        total_fees += 100;
+                    }
+
+                    ArrayList<Object> student_Data = new ArrayList<>(Arrays.asList(
+                            student_new_id,
+                            selected_level,
+                            total_fees,
+                            0
+                    ));
+
+                    datamanager.addLine("students.txt", student_Data);
+                    System.out.println(student_Data);
+
+                    for (Object each_subject : subjects) {
+
+                        String currentMonth = LocalDate.now()
+                                .getMonth()
+                                .getDisplayName(TextStyle.FULL, Locale.ENGLISH)
+                                .toLowerCase();
+
+                        System.out.println("Current month: " + currentMonth);
+
+                        ArrayList<Object> subject_Data = new ArrayList<>(Arrays.asList(
+                                student_new_id,
+                                each_subject,
+                                currentMonth
+                                ));
+
+                        datamanager.addData("student_subjects.txt",subject_Data);
+                        System.out.println(subject_Data);
+                    }
+                } else {
+
+                }
+            }
+        });
     }
 
     public void UpdateProfile(){
@@ -164,17 +307,85 @@ public class Receptionist_UI extends JFrame {
     }
 
     public void loadTableData() {
-        String[] columnName = {"Name", "IC", "Email", "Contact Number", "Address", "Level", "Subjects", "Date of Enrolment"};
-        DefaultTableModel model = new DefaultTableModel(columnName, 0);
+        String[] columnName = {"ID", "Username", "Level", "Subjects"};
 
-        ArrayList<String> users = datamanager.loadData("users.txt");
-        ArrayList<String> studentSubjects = datamanager.loadData("student_subjects.txt");
-        for (String subjectLine : studentSubjects) {
-            String[] subject_parts = subjectLine.split(",");
+        DefaultTableModel model = new DefaultTableModel(null, columnName) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
+
+        for (String student_data : datamanager.loadData("students.txt")) {
+            String [] student_Data_split = student_data.split(",");
+
+            String studentID = student_Data_split[0];
+            ArrayList<Object> student_personal_Data = datamanager.getData("users.txt",studentID);
+
+            if (student_personal_Data.get(3).equals(false)) {
+                continue;
+            }
+
+            ArrayList<String> subjects = new ArrayList<>();
+
+            for (String each_student_subject : datamanager.loadData("student_subjects.txt")) {
+                String [] each_student_subject_split = each_student_subject.split(",");
+                if (each_student_subject_split[1].equalsIgnoreCase(studentID)) {
+                    subjects.add(each_student_subject_split[2]);
+                }
+            }
+
+            int studentLevel = Integer.parseInt(student_Data_split[1]);
+
+            String all_subject_string = String.join(",", subjects);
+
+            model.addRow(new Object[]{studentID,student_personal_Data.get(1),studentLevel,all_subject_string});
         }
 
+//        ArrayList<String> studentSubjects = datamanager.loadData("student_subjects.txt");
+//        for (String subjectLine : studentSubjects) {
+//            String[] subjectParts = subjectLine.split(",");
+//
+//            String studentID = subjectParts[1];
+//
+//            ArrayList<Object> student_personal_Data = datamanager.getData("users.txt",studentID);
+//
+//            if (student_personal_Data.get(3).equals(false)) {
+//                continue;
+//            }
+//
+//            ArrayList<Object> student_data = datamanager.getData("students.txt",studentID);
+//
+//            String studentSubject = subjectParts[2];
+//            int studentLevel = (int) student_data.get(1);
+//
+//            String student_username = student_personal_Data.get(1).toString();
+//
+//            model.addRow(new Object[]{studentID,student_personal_Data.get(1),studentLevel,studentSubject});
+//        }
+
+        studentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        studentTable.getTableHeader().setResizingAllowed(false);
+        studentTable.setModel(model);
+        autoResizeTableColumns(studentTable);
+
     }
+
+    public static void autoResizeTableColumns(JTable table) {
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+        for (int column = 0; column < table.getColumnCount(); column++) {
+            int width = 100; // Min width
+            for (int row = 0; row < table.getRowCount(); row++) {
+                TableCellRenderer renderer = table.getCellRenderer(row, column);
+                Component comp = table.prepareRenderer(renderer, row, column);
+                width = Math.max(comp.getPreferredSize().width + 10, width);
+            }
+            TableColumn tableColumn = table.getColumnModel().getColumn(column);
+            tableColumn.setPreferredWidth(width);
+        }
+    }
+
     public void Run (receptionist system){
             RECEPTIONIST = system;
             WelcomeTitle.setText("Hello, " + RECEPTIONIST.getUsername() + " !");
