@@ -25,7 +25,6 @@ public class Receptionist_UI extends JFrame {
     private JButton ManageStudentButton;
     private JButton StudentPaymentButton;
     private JTable studentTable;
-    private JTextField textField1;
     private JTextField studentPaymentTextField;
     private JPanel AddStudentDetails;
     private JTextField studentnamefield;
@@ -40,7 +39,6 @@ public class Receptionist_UI extends JFrame {
     private JButton AddStudentButton;
     private JPanel StudentDetailTable;
     private JPanel StudentPayment;
-    private JPanel TestLabel;
     private JPanel UpdateProfile;
     private JTextField ReceptionistUsernameTF;
     private JTextField ReceptionistPasswordTF;
@@ -75,6 +73,10 @@ public class Receptionist_UI extends JFrame {
     private JButton EditStudentButton;
     private JPanel checkboxPanel;
     private JButton cancelButton;
+    private JPanel SubjectRequests;
+    private JTable SubjectRequestsTable;
+    private JButton ApproveButton;
+    private JButton RejectButton;
 
     private static receptionist RECEPTIONIST;
 
@@ -88,8 +90,8 @@ public class Receptionist_UI extends JFrame {
         setResizable(false);
         studentTable.getTableHeader().setReorderingAllowed(false);
 
-        TestLabel.setVisible(false);
         StudentDetailTable.setVisible(false);
+        SubjectRequests.setVisible(false);
         AddStudentDetails.setVisible(false);
         StudentPayment.setVisible(false);
         UpdateProfile.setVisible(false);
@@ -109,19 +111,30 @@ public class Receptionist_UI extends JFrame {
         ManageStudentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                TestLabel.setVisible(false);
                 StudentDetailTable.setVisible(true);
+                SubjectRequests.setVisible(false);
                 AddStudentDetails.setVisible(false);
                 StudentPayment.setVisible(false);
                 UpdateProfile.setVisible(false);
-                loadTableData();
+                loadStudentTableData();
+            }
+        });
+        StudentSubjectRequest.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                StudentDetailTable.setVisible(false);
+                SubjectRequests.setVisible(true);
+                AddStudentDetails.setVisible(false);
+                StudentPayment.setVisible(false);
+                UpdateProfile.setVisible(false);
+                loadSubjectRequestsTableData();
             }
         });
         AddStudentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                TestLabel.setVisible(false);
                 StudentDetailTable.setVisible(false);
+                SubjectRequests.setVisible(false);
                 AddStudentDetails.setVisible(true);
                 StudentPayment.setVisible(false);
                 UpdateProfile.setVisible(false);
@@ -143,8 +156,8 @@ public class Receptionist_UI extends JFrame {
                 ArrayList<Object> userData = datamanager.getData("users.txt", studentID);
                 ArrayList<Object> studentData = datamanager.getData("students.txt", studentID);
 
-                TestLabel.setVisible(false);
                 StudentDetailTable.setVisible(false);
+                SubjectRequests.setVisible(false);
                 AddStudentDetails.setVisible(true);
                 StudentPayment.setVisible(false);
                 UpdateProfile.setVisible(false);
@@ -205,15 +218,13 @@ public class Receptionist_UI extends JFrame {
                         mathematicsCheckBox.setSelected(true);
                     }
                 }
-
-//                checkboxPanel
             }
         });
         StudentPaymentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                TestLabel.setVisible(false);
                 StudentDetailTable.setVisible(false);
+                SubjectRequests.setVisible(false);
                 AddStudentDetails.setVisible(false);
                 StudentPayment.setVisible(true);
                 UpdateProfile.setVisible(false);
@@ -222,8 +233,8 @@ public class Receptionist_UI extends JFrame {
         UpdateProfileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                TestLabel.setVisible(false);
                 StudentDetailTable.setVisible(false);
+                SubjectRequests.setVisible(false);
                 AddStudentDetails.setVisible(false);
                 StudentPayment.setVisible(false);
                 UpdateProfile.setVisible(true);
@@ -237,7 +248,6 @@ public class Receptionist_UI extends JFrame {
                 UpdateCancelButtons.setVisible(false);
             }
         });
-
         EditProfileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -258,7 +268,6 @@ public class Receptionist_UI extends JFrame {
                 UpdateProfile();
             }
         });
-
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -403,12 +412,12 @@ public class Receptionist_UI extends JFrame {
 
                     JOptionPane.showMessageDialog(null, "Student successfully updated!");
                     }
-                TestLabel.setVisible(false);
                 StudentDetailTable.setVisible(true);
+                SubjectRequests.setVisible(false);
                 AddStudentDetails.setVisible(false);
                 StudentPayment.setVisible(false);
                 UpdateProfile.setVisible(false);
-                loadTableData();
+                loadStudentTableData();
             }
         });
         cancelButton.addActionListener(new ActionListener() {
@@ -431,13 +440,95 @@ public class Receptionist_UI extends JFrame {
                 mathematicsCheckBox.setSelected(false);
             }
         });
+
+        ApproveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = SubjectRequestsTable.getSelectedRow();
+
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(null, "Please select a row from the table first.");
+                    return;
+                }
+
+                String RequestID = SubjectRequestsTable.getValueAt(selectedRow, 0).toString();
+                String StudentUsername = SubjectRequestsTable.getValueAt(selectedRow, 1).toString();
+                String OldSubject = SubjectRequestsTable.getValueAt(selectedRow, 2).toString();
+                String NewSubject = SubjectRequestsTable.getValueAt(selectedRow, 3).toString();
+
+                String StudentID = "";
+                for (String user_line : datamanager.loadData("users.txt")) {
+                    String[] user_data = user_line.split(",");
+
+                    if (user_data[1].equalsIgnoreCase(StudentUsername)) {
+                        StudentID = user_data[0];
+                    }
+                }
+
+                if (StudentID.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Student not found.");
+                    return;
+                }
+
+                String student_subjects_id = "";
+                String student_subjects_month = "";
+
+                for (String subject_line : datamanager.loadData("student_subjects.txt")) {
+                    String[] subject_data = subject_line.split(",");
+
+                    if (subject_data.length == 4 && subject_data[1].equals(StudentID) && subject_data[2].equalsIgnoreCase(OldSubject)) {
+                        student_subjects_id = subject_data[0];
+                        student_subjects_month = subject_data[3];
+                    }
+                }
+
+                if (student_subjects_id.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Subject not found.");
+                    return;
+                }
+
+                datamanager.deleteData("student_subjects.txt", student_subjects_id);
+
+                ArrayList<Object> newSubjectLine  = new ArrayList<>(Arrays.asList(
+                        student_subjects_id,
+                        StudentID,
+                        NewSubject,
+                        student_subjects_month
+                ));
+
+                datamanager.addLine("student_subjects.txt", newSubjectLine);
+                datamanager.deleteData("subject_requests.txt", RequestID);
+
+                JOptionPane.showMessageDialog(null, "Subject successfully approved!");
+                loadSubjectRequestsTableData();
+                loadStudentTableData();
+            }
+        });
+        RejectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = SubjectRequestsTable.getSelectedRow();
+
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(null, "Please select a row from the table first.");
+                    return;
+                }
+
+                String RequestID = SubjectRequestsTable.getValueAt(selectedRow, 0).toString();
+
+                datamanager.deleteData("subject_requests.txt", RequestID);
+                JOptionPane.showMessageDialog(null, "Subject successfully rejected!");
+                loadSubjectRequestsTableData();
+
+            }
+        });
     }
 
     public void UpdateProfile(){
 
     }
 
-    public void loadTableData() {
+    public void loadStudentTableData() {
         String[] columnName = {"ID", "Username", "Level", "Subjects"};
 
         DefaultTableModel model = new DefaultTableModel(null, columnName) {
@@ -453,7 +544,7 @@ public class Receptionist_UI extends JFrame {
             String studentID = student_Data_split[0];
             ArrayList<Object> student_personal_Data = datamanager.getData("users.txt",studentID);
 
-            if (student_personal_Data.get(3).equals(false)) {
+            if (student_personal_Data.size() <= 3 || student_personal_Data.get(3).equals(false)) {
                 continue;
             }
 
@@ -473,33 +564,46 @@ public class Receptionist_UI extends JFrame {
             model.addRow(new Object[]{studentID,student_personal_Data.get(1),studentLevel,all_subject_string});
         }
 
-//        ArrayList<String> studentSubjects = datamanager.loadData("student_subjects.txt");
-//        for (String subjectLine : studentSubjects) {
-//            String[] subjectParts = subjectLine.split(",");
-//
-//            String studentID = subjectParts[1];
-//
-//            ArrayList<Object> student_personal_Data = datamanager.getData("users.txt",studentID);
-//
-//            if (student_personal_Data.get(3).equals(false)) {
-//                continue;
-//            }
-//
-//            ArrayList<Object> student_data = datamanager.getData("students.txt",studentID);
-//
-//            String studentSubject = subjectParts[2];
-//            int studentLevel = (int) student_data.get(1);
-//
-//            String student_username = student_personal_Data.get(1).toString();
-//
-//            model.addRow(new Object[]{studentID,student_personal_Data.get(1),studentLevel,studentSubject});
-//        }
-
         studentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         studentTable.getTableHeader().setResizingAllowed(false);
         studentTable.setModel(model);
         autoResizeTableColumns(studentTable);
 
+    }
+
+    public void loadSubjectRequestsTableData() {
+        String[] columnName = {"ID", "Student Name", "Old Subject", "New Subject"};
+
+        DefaultTableModel model = new DefaultTableModel(null, columnName) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        for (String subject_data : datamanager.loadData("subject_requests.txt")) {
+            String[] subject_data_split = subject_data.split(",");
+
+            if (subject_data_split.length == 4) {
+                String RequestID = subject_data_split[0];
+                String StudentID = subject_data_split[1];
+                String OldSubject = subject_data_split[2];
+                String NewSubject = subject_data_split[3];
+
+                ArrayList<Object> student_personal_Data = datamanager.getData("users.txt", StudentID);
+
+                if (student_personal_Data.get(3).equals(false)) {
+                    continue;
+                }
+
+                String StudentUsername = student_personal_Data.get(1).toString();
+                model.addRow(new Object[]{RequestID, StudentUsername, OldSubject, NewSubject});
+            }
+        }
+
+        SubjectRequestsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        SubjectRequestsTable.getTableHeader().setResizingAllowed(false);
+        SubjectRequestsTable.setModel(model);
+        autoResizeTableColumns(SubjectRequestsTable);
     }
 
     public static void autoResizeTableColumns(JTable table) {
