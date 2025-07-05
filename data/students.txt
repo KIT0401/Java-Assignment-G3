@@ -1,3 +1,3 @@
 id,level,fee_amount,fee_paid
 string,int,float,float
-4,1,100.10,50.20
+4,1,150,0

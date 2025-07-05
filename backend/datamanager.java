@@ -229,6 +229,8 @@ public class datamanager {
                                 data.add(i,Integer.parseInt(parts[i]));
                             } else if (type.equalsIgnoreCase("double")) {
                                 data.add(i,Double.parseDouble(parts[i]));
+                            } else if (type.equalsIgnoreCase("float")) {
+                                data.add(i,Float.parseFloat(parts[i]));
                             } else {
                                 System.out.println("Unknown Data Type " + type);
                             }

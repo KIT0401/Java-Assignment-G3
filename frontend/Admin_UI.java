@@ -4,9 +4,8 @@ import backend.admin;
 import backend.datamanager;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -47,14 +46,23 @@ public class Admin_UI extends JFrame {
     private JLabel ShowReceptionistID;
     private JTextField ReceptionistPasswordField;
     private JButton SaveReceptionistButton;
-    private JComboBox comboBox1;
-    private JRadioButton malayRadioButton;
+    private JComboBox TutorLevelComboBox;
+    private JRadioButton malayTutorRadio;
     private JButton DeleteTutorButton;
     private JButton EditTutorButton;
     private JButton AddTutorButton;
     private JButton SaveTutorButton;
+    private JRadioButton chineseTutorRadio;
+    private JRadioButton englishTutorRadio;
+    private JRadioButton mathematicsTutorRadio;
+    private JRadioButton scienceTutorRadio;
+    private JTextField tutorpasswordfield;
+    private JTextField tutorusernamefield;
+    private JLabel showtutorid;
+    private JTable TutorTable;
 
-    private DefaultTableModel model;
+    private DefaultTableModel Receptionistmodel;
+    private DefaultTableModel Tutormodel;
 
     private static admin ADMIN;
 
@@ -75,6 +83,12 @@ public class Admin_UI extends JFrame {
         SaveButton.setVisible(false);
         DeleteReceptionistButton.setVisible(true);
         EditReceptionistButton.setVisible(true);
+
+        TutorLevelComboBox.setModel(new DefaultComboBoxModel<>(new Integer[]{
+                1,2,3,4,5
+        }));
+
+        RefreshManageTutor();
 
         LogOutButton.addActionListener(new ActionListener() {
             @Override
@@ -103,6 +117,8 @@ public class Admin_UI extends JFrame {
                 ManageTutorFrame.setVisible(true);
                 ManageReceptionistFrame.setVisible(false);
                 ProfileFrame.setVisible(false);
+
+                RefreshManageTutor();
             }
         });
         manageReceptionistButton.addActionListener(new ActionListener() {
@@ -170,21 +186,195 @@ public class Admin_UI extends JFrame {
             }
         });
 
-        ReceptionistTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) {
-                    int selectedRow = ReceptionistTable.getSelectedRow();
+//        ReceptionistTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+//            @Override
+//            public void valueChanged(ListSelectionEvent e) {
+//                if (!e.getValueIsAdjusting()) {
+//                    int selectedRow = ReceptionistTable.getSelectedRow();
+//
+//                    if (selectedRow != -1) {
+////                        String id = model.getValueAt(selectedRow, 0).toString();
+////                        String name = model.getValueAt(selectedRow, 1).toString();
+////                        String dept = model.getValueAt(selectedRow, 2).toString();
+////                        System.out.println(id + name + dept);
+//
+//                        EditReceptionistButton.setVisible(true);
+//                        DeleteReceptionistButton.setVisible(true);
+//                    }
+//                }
+//            }
+//        });
 
-                    if (selectedRow != -1) {
-//                        String id = model.getValueAt(selectedRow, 0).toString();
-//                        String name = model.getValueAt(selectedRow, 1).toString();
-//                        String dept = model.getValueAt(selectedRow, 2).toString();
-//                        System.out.println(id + name + dept);
+        AddTutorButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<String> subjects = new ArrayList<>();
 
-                        EditReceptionistButton.setVisible(true);
-                        DeleteReceptionistButton.setVisible(true);
+                if (malayTutorRadio.isSelected()){
+                    subjects.add("malay");
+                }
+                if (chineseTutorRadio.isSelected()){
+                    subjects.add("chinese");
+                }
+                if (englishTutorRadio.isSelected()){
+                    subjects.add("english");
+                }
+                if (scienceTutorRadio.isSelected()){
+                    subjects.add("science");
+                }
+                if (mathematicsTutorRadio.isSelected()){
+                    subjects.add("mathematics");
+                }
+
+                int level = (int) TutorLevelComboBox.getSelectedItem();
+
+                ArrayList<Object> result = ADMIN.addTutor(
+                        tutorusernamefield.getText(),
+                        tutorpasswordfield.getText(),
+                        level,
+                        subjects
+                );
+
+                if (result.getFirst().equals(true)) {
+
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < subjects.size(); i++) {
+                        String subject = subjects.get(i);
+
+                        String capitalized = subject.substring(0, 1).toUpperCase() + subject.substring(1).toLowerCase();
+                        sb.append(capitalized);
+                        if (i < subjects.size() - 1) {
+                            sb.append(",");
+                        }
                     }
+                    String subjects_string = sb.toString();
+
+                    Tutormodel.addRow(new Object[]{result.get(2), tutorusernamefield.getText(), tutorpasswordfield.getText(), level,subjects_string});
+
+                    int newRow = Tutormodel.getRowCount() - 1;
+                    TutorTable.setRowSelectionInterval(newRow, newRow);
+                    TutorTable.scrollRectToVisible(TutorTable.getCellRect(newRow, 0, true));
+
+                    showtutorid.setText(result.get(2).toString());
+
+                    SaveReceptionistButton.setVisible(true);
+                    DeleteReceptionistButton.setVisible(true);
+                    EditReceptionistButton.setVisible(true);
+                }
+
+                JOptionPane.showMessageDialog(null, result.get(1));
+            }
+        });
+
+        EditTutorButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = TutorTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    String id = Tutormodel.getValueAt(selectedRow, 0).toString();
+                    String username = Tutormodel.getValueAt(selectedRow, 1).toString();
+                    String password = Tutormodel.getValueAt(selectedRow, 2).toString();
+                    int level = (int) Tutormodel.getValueAt(selectedRow, 3);
+                    String [] subjects = Tutormodel.getValueAt(selectedRow, 4).toString().split(",");
+
+                    showtutorid.setText(id);
+                    tutorusernamefield.setText(username);
+                    tutorpasswordfield.setText(password);
+                    TutorLevelComboBox.setSelectedIndex(level - 1);
+
+                    malayTutorRadio.setSelected(false);
+                    chineseTutorRadio.setSelected(false);
+                    scienceTutorRadio.setSelected(false);
+                    englishTutorRadio.setSelected(false);
+                    mathematicsTutorRadio.setSelected(false);
+
+                    for (String each_subject : subjects) {
+                        if (each_subject.equalsIgnoreCase("malay")) {
+                            malayTutorRadio.setSelected(true);
+                        } else if (each_subject.equalsIgnoreCase("chinese")) {
+                            chineseTutorRadio.setSelected(true);
+                        } else if (each_subject.equalsIgnoreCase("science")) {
+                            scienceTutorRadio.setSelected(true);
+                        } else if (each_subject.equalsIgnoreCase("english")) {
+                            englishTutorRadio.setSelected(true);
+                        } else if (each_subject.equalsIgnoreCase("mathematics")) {
+                            mathematicsTutorRadio.setSelected(true);
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null,"Please select a row first!");
+                }
+            }
+        });
+
+        DeleteTutorButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = TutorTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    String id = Tutormodel.getValueAt(selectedRow, 0).toString();
+                    String username = Tutormodel.getValueAt(selectedRow, 1).toString();
+
+                    int result = JOptionPane.showConfirmDialog(null,"Are you sure want delete "+ username +"'s data?","Confirm",JOptionPane.YES_NO_OPTION);
+
+                    if (result == 0) {
+                        boolean result2 = ADMIN.deleteTutor(id);
+
+                        if (result2) {
+                            for (int i = 0; i < Tutormodel.getRowCount(); i++) {
+                                String rowId = Tutormodel.getValueAt(i, 0).toString();
+                                if (Objects.equals(rowId, id)) {
+                                    Tutormodel.removeRow(i);
+
+                                    if (showtutorid.getText().equalsIgnoreCase(id)) {
+                                        showtutorid.setText("---");
+                                        tutorusernamefield.setText("");
+                                        tutorpasswordfield.setText("");
+                                        TutorLevelComboBox.setSelectedIndex(0);
+
+                                        malayTutorRadio.setSelected(false);
+                                        chineseTutorRadio.setSelected(false);
+                                        englishTutorRadio.setSelected(false);
+                                        scienceTutorRadio.setSelected(false);
+                                        mathematicsTutorRadio.setSelected(false);
+                                    }
+
+                                    JOptionPane.showMessageDialog(null,"Successful Deleted Tutor " + username + "'s Data");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null,"Please select a row to delete data");
+                }
+            }
+        });
+
+        SaveTutorButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (!showtutorid.getText().equalsIgnoreCase("---")) {
+                    ArrayList<String> subjects = new ArrayList<>();
+
+                    if (malayTutorRadio.isSelected()) {
+                        subjects.add("malay");
+                    }
+                    if (chineseTutorRadio.isSelected()) {
+                        subjects.add("chinese");
+                    }
+                    if (englishTutorRadio.isSelected()) {
+                        subjects.add("english");
+                    }
+                    if (scienceTutorRadio.isSelected()) {
+                        subjects.add("science");
+                    }
+                    if (mathematicsTutorRadio.isSelected()) {
+                        subjects.add("mathematics");
+                    }
+
+                    if (ADMIN.saveTutor(showtutorid.getText(),tutorusernamefield.getText(),tutorpasswordfield.getText(), (Integer) TutorLevelComboBox.getSelectedItem(),subjects)) {
+                        RefreshManageTutor();
+                        JOptionPane.showMessageDialog(null,"Successful Saved Tutor ID" + showtutorid.getText() + "'s Data");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null,"Please select an row and press edit button first.");
                 }
             }
         });
@@ -192,16 +382,15 @@ public class Admin_UI extends JFrame {
         AddReceptionistButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 ArrayList<Object> result = ADMIN.addReceptionist(
                         ReceptionistUsernameField.getText(),
                         ReceptionistPasswordField.getText()
                 );
 
                 if (result.getFirst().equals(true)) {
-                    model.addRow(new Object[]{result.get(2), ReceptionistUsernameField.getText(), ReceptionistPasswordField.getText()});
+                    Receptionistmodel.addRow(new Object[]{result.get(2), ReceptionistUsernameField.getText(), ReceptionistPasswordField.getText()});
 
-                    int newRow = model.getRowCount() - 1;
+                    int newRow = Receptionistmodel.getRowCount() - 1;
                     ReceptionistTable.setRowSelectionInterval(newRow, newRow);
                     ReceptionistTable.scrollRectToVisible(ReceptionistTable.getCellRect(newRow, 0, true));
 
@@ -221,9 +410,9 @@ public class Admin_UI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = ReceptionistTable.getSelectedRow();
                 if (selectedRow != -1) {
-                    String id = model.getValueAt(selectedRow, 0).toString();
-                    String username = model.getValueAt(selectedRow, 1).toString();
-                    String password = model.getValueAt(selectedRow, 2).toString();
+                    String id = Receptionistmodel.getValueAt(selectedRow, 0).toString();
+                    String username = Receptionistmodel.getValueAt(selectedRow, 1).toString();
+                    String password = Receptionistmodel.getValueAt(selectedRow, 2).toString();
 
                     ShowReceptionistID.setText(id);
                     ReceptionistUsernameField.setText(username);
@@ -240,20 +429,20 @@ public class Admin_UI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = ReceptionistTable.getSelectedRow();
                 if (selectedRow != -1) {
-                    String id = model.getValueAt(selectedRow, 0).toString();
-                    String username = model.getValueAt(selectedRow, 1).toString();
+                    String id = Receptionistmodel.getValueAt(selectedRow, 0).toString();
+                    String username = Receptionistmodel.getValueAt(selectedRow, 1).toString();
                     // String password = model.getValueAt(selectedRow, 2).toString();
 
-                    int result = JOptionPane.showConfirmDialog(null,"Are you sure want delete "+ username +"?","Confirm",JOptionPane.YES_NO_OPTION);
+                    int result = JOptionPane.showConfirmDialog(null,"Are you sure want delete "+ username +"'s data?","Confirm",JOptionPane.YES_NO_OPTION);
 
                     if (result == 0) {
                         boolean result2 = ADMIN.deleteReceptionist(id);
 
                         if (result2) {
-                            for (int i = 0; i < model.getRowCount(); i++) {
-                                String rowId = model.getValueAt(i, 0).toString();
+                            for (int i = 0; i < Receptionistmodel.getRowCount(); i++) {
+                                String rowId = Receptionistmodel.getValueAt(i, 0).toString();
                                 if (Objects.equals(rowId, id)) {
-                                    model.removeRow(i);
+                                    Receptionistmodel.removeRow(i);
 
                                     if (ShowReceptionistID.getText().equalsIgnoreCase(id)) {
                                         ShowReceptionistID.setText("---");
@@ -268,7 +457,7 @@ public class Admin_UI extends JFrame {
                         }
                     }
                 } else {
-                    JOptionPane.showMessageDialog(null,"Please select a row and press edit button first!");
+                    JOptionPane.showMessageDialog(null,"Please select a row to delete data!");
                 }
             }
         });
@@ -278,6 +467,7 @@ public class Admin_UI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (!ShowReceptionistID.getText().equalsIgnoreCase("---")) {
                     if (ADMIN.saveReceptionist(ShowReceptionistID.getText(),ReceptionistUsernameField.getText(),ReceptionistPasswordField.getText())) {
+                        RefreshManageReceptionist();
                         JOptionPane.showMessageDialog(null,"Successful Saved Receptionist ID" + ShowReceptionistID.getText() + "'s Data");
                     }
                 } else {
@@ -287,18 +477,85 @@ public class Admin_UI extends JFrame {
         });
     }
 
-    public void RefreshManageReceptionist(){
-        String [] columnNames = {"ID","Username","Password"};
+    public void RefreshManageTutor(){
+        String [] columnNames = {"ID","Username","Password","Level","Subjects"};
 
-        model = new DefaultTableModel(null, columnNames) {
+        Tutormodel = new DefaultTableModel(null, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
 
-        ReceptionistTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        ReceptionistTable.getTableHeader().setResizingAllowed(false);
+        ArrayList<String> tutorData = datamanager.loadData("tutors.txt");
+
+        for (String tutorLine : tutorData) {
+            String [] split_data = tutorLine.split(",");
+            String tutorID = split_data[0];
+
+            ArrayList<Object> userData = datamanager.getData("users.txt",tutorID);
+
+            if (userData.get(3).equals(false)) {
+                continue;
+            }
+
+            ArrayList<String> subjects = new ArrayList<>();
+
+            ArrayList<String> tutor_subjects = datamanager.loadData("tutor_subjects.txt");
+
+            for (String each_tutor_subject : tutor_subjects) {
+                String [] each_tutor_subject_split = each_tutor_subject.split(",");
+
+                if (each_tutor_subject_split[1].equalsIgnoreCase(tutorID)) {
+                    subjects.add(each_tutor_subject_split[2]);
+                }
+            }
+
+            String subjects_string;
+
+            if (subjects.size() <= 0) {
+                subjects_string = "";
+            } else {
+                StringBuilder result = new StringBuilder();
+                for (int i = 0; i < subjects.size(); i++) {
+                    String subject = subjects.get(i);
+
+                    String capitalized = subject.substring(0, 1).toUpperCase() + subject.substring(1).toLowerCase();
+                    result.append(capitalized);
+                    if (i < subjects.size() - 1) {
+                        result.append(",");
+                    }
+                }
+                subjects_string = result.toString();
+            }
+
+            Tutormodel.addRow(new Object[]{tutorID,userData.get(1),userData.get(2),Integer.parseInt(split_data[1]),subjects_string});
+        }
+
+
+        TutorTable.setModel(Tutormodel);
+        TutorTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        TutorTable.getTableHeader().setResizingAllowed(false);
+        TutorTable.getTableHeader().setReorderingAllowed(false);
+
+        TableColumnModel columnModel = TutorTable.getColumnModel();
+        TutorTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        columnModel.getColumn(0).setPreferredWidth(25);
+        columnModel.getColumn(1).setPreferredWidth(75);
+        columnModel.getColumn(2).setPreferredWidth(75);
+        columnModel.getColumn(3).setPreferredWidth(50);
+        columnModel.getColumn(4).setPreferredWidth(250);
+    }
+
+    public void RefreshManageReceptionist(){
+        String [] columnNames = {"ID","Username","Password"};
+
+        Receptionistmodel = new DefaultTableModel(null, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
 
         ArrayList<String> receptionistData = datamanager.loadData("receptionists.txt");
 
@@ -310,10 +567,19 @@ public class Admin_UI extends JFrame {
                 continue;
             }
 
-            model.addRow(new Object[]{split_data[0],userData.get(1),userData.get(2)});
+            Receptionistmodel.addRow(new Object[]{split_data[0],userData.get(1),userData.get(2)});
         }
 
-        ReceptionistTable.setModel(model);
+        ReceptionistTable.setModel(Receptionistmodel);
+        ReceptionistTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        ReceptionistTable.getTableHeader().setResizingAllowed(false);
+        ReceptionistTable.getTableHeader().setReorderingAllowed(false);
+
+        TableColumnModel columnModel = ReceptionistTable.getColumnModel();
+        ReceptionistTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        columnModel.getColumn(0).setPreferredWidth(50);
+        columnModel.getColumn(1).setPreferredWidth(225);
+        columnModel.getColumn(2).setPreferredWidth(225);
     }
 
     public void RefreshProfile(){
