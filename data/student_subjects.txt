@@ -1,4 +1,4 @@
 id,student_id,receptionist_id,subject,month_of_enrolment
-string,string,string,string,int,string
+string,string,string,string,string
 1,4,2,english,july
 2,4,2,science,july
