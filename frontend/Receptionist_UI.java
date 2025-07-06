@@ -220,6 +220,32 @@ public class Receptionist_UI extends JFrame {
                 }
             }
         });
+        DeleteStudentButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = studentTable.getSelectedRow();
+
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(null, "Please select a row from the table first.");
+                    return;
+                }
+
+                String studentID = studentTable.getValueAt(selectedRow, 0).toString();
+
+                ArrayList<Object> userData = datamanager.getData("users.txt", studentID);
+                if (userData.size() < 4 || userData.get(3).equals(false)) {
+                    JOptionPane.showMessageDialog(null, "Student data not found or corrupted.");
+                    return;
+                }
+
+                userData.set(3, false);
+                datamanager.updateData("users.txt", userData);
+
+                JOptionPane.showMessageDialog(null, "Student has been deactivated.");
+                loadStudentTableData();
+                loadSubjectRequestsTableData();
+            }
+        });
         StudentPaymentButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -544,7 +570,7 @@ public class Receptionist_UI extends JFrame {
             String studentID = student_Data_split[0];
             ArrayList<Object> student_personal_Data = datamanager.getData("users.txt",studentID);
 
-            if (student_personal_Data.size() <= 3 || student_personal_Data.get(3).equals(false)) {
+            if (student_personal_Data.size() < 4 || student_personal_Data.get(3).equals(false)) {
                 continue;
             }
 
@@ -591,7 +617,7 @@ public class Receptionist_UI extends JFrame {
 
                 ArrayList<Object> student_personal_Data = datamanager.getData("users.txt", StudentID);
 
-                if (student_personal_Data.get(3).equals(false)) {
+                if (student_personal_Data.size() < 4 || student_personal_Data.get(3).equals(false)) {
                     continue;
                 }
 
