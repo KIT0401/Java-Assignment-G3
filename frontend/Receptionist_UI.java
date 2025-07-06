@@ -497,7 +497,7 @@ public class Receptionist_UI extends JFrame {
                 ));
 
                 datamanager.addLine("student_subjects.txt", newSubjectLine);
-                datamanager.deleteData("subject_requests.txt", RequestID);
+                datamanager.deleteData("student_requests.txt", RequestID);
 
                 JOptionPane.showMessageDialog(null, "Subject successfully approved!");
                 loadSubjectRequestsTableData();
@@ -516,7 +516,7 @@ public class Receptionist_UI extends JFrame {
 
                 String RequestID = SubjectRequestsTable.getValueAt(selectedRow, 0).toString();
 
-                datamanager.deleteData("subject_requests.txt", RequestID);
+                datamanager.deleteData("student_requests.txt", RequestID);
                 JOptionPane.showMessageDialog(null, "Subject successfully rejected!");
                 loadSubjectRequestsTableData();
 
@@ -580,7 +580,7 @@ public class Receptionist_UI extends JFrame {
             }
         };
 
-        for (String subject_data : datamanager.loadData("subject_requests.txt")) {
+        for (String subject_data : datamanager.loadData("student_requests.txt")) {
             String[] subject_data_split = subject_data.split(",");
 
             if (subject_data_split.length == 4) {

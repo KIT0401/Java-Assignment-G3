@@ -1,4 +1,0 @@
-id,studentid,oldsubject,newsubject
-string,string,string,string
-1,4,english,mathematics
-2,8,science,chinese
