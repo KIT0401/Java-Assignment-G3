@@ -1,0 +1,3 @@
+id,student_id,amount
+string,string,float
+12312,4,50
