@@ -509,7 +509,8 @@ public class Receptionist_UI extends JFrame {
                 }
 
                 if (student_subjects_id.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Subject not found.");
+                    JOptionPane.showMessageDialog(null, "Subject not found, request will be deleted.");
+                    datamanager.deleteData("student_requests.txt", RequestID);
                     return;
                 }
 
