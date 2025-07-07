@@ -2,3 +2,6 @@ id,student_id,subject,month_of_enrolment
 string,string,string,string
 1,4,english,july
 2,4,science,july
+3,4,chinese,july
+4,4,malay,july
+5,4,mathematics,july
