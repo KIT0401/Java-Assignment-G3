@@ -61,6 +61,10 @@ public class user {
         this.username = username;
     }
 
+    public String getId(){
+        return this.id;
+    }
+
     public String UpdateProfile(String username,String password, String ic, String email, String contact_number, String address){
         this.username = username;
         this.password = password;
