@@ -60,6 +60,15 @@ public class Admin_UI extends JFrame {
     private JTextField tutorusernamefield;
     private JLabel showtutorid;
     private JTable TutorTable;
+    private JComboBox MonthComboBox;
+    private JComboBox LevelComboBox;
+    private JComboBox SubjectComboBox;
+    private JButton ViewIncomeButton;
+    private JLabel ShowIncomeMonth;
+    private JLabel ShowIncomeLevel;
+    private JLabel ShowIncomeSubject;
+    private JLabel ShowTotalIncome;
+    private JLabel ShowIncomeOutstanding;
 
     private DefaultTableModel Receptionistmodel;
     private DefaultTableModel Tutormodel;
@@ -89,6 +98,7 @@ public class Admin_UI extends JFrame {
         }));
 
         RefreshManageTutor();
+        RefreshMonthlyIncome();
 
         LogOutButton.addActionListener(new ActionListener() {
             @Override
@@ -185,25 +195,6 @@ public class Admin_UI extends JFrame {
                 RefreshProfile();
             }
         });
-
-//        ReceptionistTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-//            @Override
-//            public void valueChanged(ListSelectionEvent e) {
-//                if (!e.getValueIsAdjusting()) {
-//                    int selectedRow = ReceptionistTable.getSelectedRow();
-//
-//                    if (selectedRow != -1) {
-////                        String id = model.getValueAt(selectedRow, 0).toString();
-////                        String name = model.getValueAt(selectedRow, 1).toString();
-////                        String dept = model.getValueAt(selectedRow, 2).toString();
-////                        System.out.println(id + name + dept);
-//
-//                        EditReceptionistButton.setVisible(true);
-//                        DeleteReceptionistButton.setVisible(true);
-//                    }
-//                }
-//            }
-//        });
 
         AddTutorButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -475,6 +466,13 @@ public class Admin_UI extends JFrame {
                 }
             }
         });
+
+        ViewIncomeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               ViewMonthlyIncome();
+            }
+        });
     }
 
     public void RefreshManageTutor(){
@@ -580,6 +578,84 @@ public class Admin_UI extends JFrame {
         columnModel.getColumn(0).setPreferredWidth(50);
         columnModel.getColumn(1).setPreferredWidth(225);
         columnModel.getColumn(2).setPreferredWidth(225);
+    }
+
+    public void RefreshMonthlyIncome() {
+        LevelComboBox.setModel(new DefaultComboBoxModel<>(new Integer[]{
+                1,2,3,4,5
+        }));
+
+        SubjectComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
+                "English",
+                "Malay",
+                "Chinese",
+                "Science",
+                "Mathematics",
+        }));
+
+        ArrayList<String> months = new ArrayList<>();
+
+        for (String each_student_subject : datamanager.loadData("student_subjects.txt")) {
+            String [] each_student_subject_split = each_student_subject.split(",");
+
+            if (!months.contains(each_student_subject_split[3])) {
+                months.add(each_student_subject_split[3]);
+            }
+        }
+
+        if (months.size() <= 0) {
+            MonthComboBox.setModel(new DefaultComboBoxModel<>(new String[]{
+                    "None",
+            }));
+        } else {
+            String[] monthsArray = months.stream()
+                    .map(month -> month.substring(0, 1).toUpperCase() + month.substring(1).toLowerCase())
+                    .toArray(String[]::new);
+
+            MonthComboBox.setModel(new DefaultComboBoxModel<>(monthsArray));
+        }
+
+    }
+
+    public void ViewMonthlyIncome() {
+        if (MonthComboBox.getSelectedItem().toString().equalsIgnoreCase("None")) {
+            JOptionPane.showMessageDialog(null,"You don't have a student enrolled a subject!");
+            return;
+        }
+        int total_income = 0;
+        int total_fees = 0;
+        int total_outstanding = 0;
+
+        String selected_month = MonthComboBox.getSelectedItem().toString().toLowerCase();
+        int selected_level = (int) LevelComboBox.getSelectedItem();
+        String selected_subject = SubjectComboBox.getSelectedItem().toString().toLowerCase();
+
+        for (String each_student_subject : datamanager.loadData("student_subjects.txt")) {
+            String[] each_student_subject_split = each_student_subject.split(",");
+
+            if (each_student_subject_split[3].equalsIgnoreCase(selected_month) && each_student_subject_split[2].equalsIgnoreCase(selected_subject)
+            && datamanager.getData("students.txt",each_student_subject_split[1]).get(1).equals(selected_level)
+            ) {
+                total_fees += Integer.parseInt(each_student_subject_split[4]);
+
+                for (String each_student_receipts : datamanager.loadData("student_receipts.txt")) {
+                    String[] each_student_receipts_split = each_student_receipts.split(",");
+
+                    if (each_student_receipts_split[1].equalsIgnoreCase(each_student_subject_split[1]) && each_student_receipts_split[3].equalsIgnoreCase(selected_subject)) {
+                        total_income += Integer.parseInt(each_student_receipts_split[2]);
+                    }
+                }
+            }
+
+        }
+
+        total_outstanding = total_fees - total_income;
+
+        ShowIncomeLevel.setText(String.valueOf(selected_level));
+        ShowIncomeMonth.setText(selected_month.substring(0, 1).toUpperCase() + selected_month.substring(1).toLowerCase());
+        ShowIncomeSubject.setText(selected_subject.substring(0, 1).toUpperCase() + selected_subject.substring(1).toLowerCase());
+        ShowIncomeOutstanding.setText(String.format("%,d", total_outstanding));
+        ShowTotalIncome.setText(String.format("%,d", total_income));
     }
 
     public void RefreshProfile(){
