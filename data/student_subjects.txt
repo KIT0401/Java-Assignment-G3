@@ -1,4 +1,4 @@
-id,student_id,subject,month_of_enrolment
-string,string,string,string
-1,4,english,july
-2,4,science,july
+id,student_id,subject,month_of_enrolment,total_fees
+string,string,string,string,float
+1,4,english,july,100
+2,4,science,july,100
