@@ -1,5 +1,4 @@
 id,subject_name,class_type,classroom,week,time,class_mode,active,teacher_id
 string,string,string,string,string,string,string,boolean,string
-1,chinese,Lab,Class 3 ,Wednesday,13.00-14.00,Hybrid,true,5
-2,english,Tutorial,Class 1 ,Friday,14.00-15.00,Online,true,5
-3,english,Lecturer,Class 1 ,Friday,15.00-16.00,Physical,true,5
+1,chinese,Lab,Class 3 ,Wednesday,13.00-14.00,Hybrid,true,3
+2,english,Tutorial,Class 1 ,Friday,14.00-15.00,Online,true,3
