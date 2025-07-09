@@ -23,12 +23,11 @@ public class Tutor_UI extends JFrame {
     private JButton AddClassButton;
     private JPanel UpdateProfileFrame;
     private JPanel AddClassFrame;
-    private JTextField SubTextBox;
+    private JTextField SubjectBox;
     private JTextField SubjectFeeTextField;
     private JComboBox ModeBox;
     private JPanel subject;
-    private JComboBox StudentLevelBox;
-    private JPanel level;
+    private JComboBox ClassroomBox;
     private JButton createButton;
     private JComboBox WeekBox;
     private JComboBox TimeBox;
@@ -56,6 +55,25 @@ public class Tutor_UI extends JFrame {
     private JButton EditClassButton;
     private JPanel EditClassFrame;
     private JTable EditTable;
+    private JComboBox box;
+    private JComboBox ClassNameBox;
+    private JComboBox Edit_Class_Type;
+    private JComboBox Edit_Week_Box;
+    private JComboBox Edit_Classroom;
+    private JComboBox Edit_Time_Box;
+    private JComboBox Edit_Mode_Class;
+    private JButton editButton;
+    private JButton deleteButton;
+    private JPanel EditDetailFrame;
+    private JPanel SearchFrame;
+    private JLabel Edit_ID_Text;
+    private JLabel Edit_Class_Name;
+    private JButton saveButton;
+    private JTextField Search_Bar;
+    private JButton EditEnterButton;
+    private JButton viewStudentButton;
+    private JTable table1;
+    private JPanel SearchPanel;
 
     private static tutor TUTOR;
 
@@ -69,6 +87,8 @@ public class Tutor_UI extends JFrame {
         setResizable(false);
         AddClassFrame.setVisible(false);
         UpdateProfileFrame.setVisible(false);
+        SearchFrame.setVisible(false);
+        EditClassFrame.setVisible(false);
 
         LogOutButton.addActionListener(new ActionListener() {
             @Override
@@ -88,6 +108,9 @@ public class Tutor_UI extends JFrame {
                 AddClassFrame.setVisible(true);
                 UpdateProfileFrame.setVisible(false);
                 EditClassFrame.setVisible(false);
+                get_subject();
+                SearchFrame.setVisible(false);
+                EditDetailFrame.setVisible(false);
             }
         });
 
@@ -99,6 +122,8 @@ public class Tutor_UI extends JFrame {
                 SaveButton.setVisible(false);
                 EditClassFrame.setVisible(false);
                 UpdateProfile();
+                SearchFrame.setVisible(false);
+                EditDetailFrame.setVisible(false);
             }
         });
 
@@ -108,7 +133,9 @@ public class Tutor_UI extends JFrame {
                 AddClassFrame.setVisible(false);
                 UpdateProfileFrame.setVisible(false);
                 EditClassFrame.setVisible(true);
-                insert_data_table();
+                SearchFrame.setVisible(true);
+                EditDetailFrame.setVisible(false);
+                saveButton.setVisible(false);
             }
         });
 
@@ -118,8 +145,8 @@ public class Tutor_UI extends JFrame {
         }));
 
 // add option to student level box
-        StudentLevelBox.setModel(new DefaultComboBoxModel<>(new String[]{
-                "< None >", "Level 1", "Level 2 ", "Level 3"
+        ClassroomBox.setModel(new DefaultComboBoxModel<>(new String[]{
+                "< None >", "Class 1", "Class 2", "Class 3", "Class 4","Class 5"
         }));
 
 // add option to Week box
@@ -136,47 +163,10 @@ public class Tutor_UI extends JFrame {
         ClassTypeBox.setModel(new DefaultComboBoxModel<>(new String[]{
             "< Class Type >","Lecture","Tutorial", "Lab"
         }));
-// set the word to gray and disappear when user type
-        SubTextBox.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (SubTextBox.getText().equals("Enter Subject Name")){
-                    SubTextBox.setText("");
-                    SubTextBox.setForeground(Color.BLACK);
-                }
-            }
 
-        });
-        SubTextBox.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (SubTextBox.getText().isEmpty()){
-                    SubTextBox.setText("Enter Subject Name");
-                    SubTextBox.setForeground(Color.LIGHT_GRAY);
-                }
+        ClassNameBox.setModel(new DefaultComboBoxModel<>(new String[]{
 
-            }
-        });
-
-// set the word to gray and disappear when user type
-        SubjectFeeTextField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (SubjectFeeTextField.getText().equals("e.g. 20.50")){
-                    SubjectFeeTextField.setText("");
-                    SubjectFeeTextField.setForeground(Color.BLACK);
-                }
-            }
-        });
-        SubjectFeeTextField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (SubjectFeeTextField.getText().isEmpty()){
-                    SubjectFeeTextField.setText("e.g. 20.50");
-                    SubjectFeeTextField.setForeground(Color.LIGHT_GRAY);
-                }
-            }
-        });
+        }));
 
 
         createButton.addActionListener(new ActionListener() {
@@ -184,16 +174,15 @@ public class Tutor_UI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 checkSub.setText("");
                 checkLevel.setText("");
-                checkCos.setText("");
                 checkType.setText("");
                 checkMode.setText("");
                 checkSchedule.setText("");
 
                 boolean pass = true;
 
-                if (SubTextBox.getText().equals("Enter Subject Name")){
+                if ("< None >".equals(ClassNameBox.getSelectedItem())){
                     checkSub.setText("*");
-                    pass = false;
+                    pass=false;
                 }
 
                 if ("< Class Type >".equals(ClassTypeBox.getSelectedItem())){
@@ -201,13 +190,8 @@ public class Tutor_UI extends JFrame {
                     pass = false;
                 }
 
-                if ("< None >".equals(StudentLevelBox.getSelectedItem())){
+                if ("< None >".equals(ClassroomBox.getSelectedItem())){
                     checkLevel.setText("*");
-                    pass = false;
-                }
-
-                if (SubjectFeeTextField.getText().equals("e.g. 20.50") || !SubjectFeeTextField.getText().matches("^\\d+(\\.\\d{1,2})?$")){
-                    checkCos.setText("*");
                     pass = false;
                 }
 
@@ -218,30 +202,31 @@ public class Tutor_UI extends JFrame {
 
                 if ("< None >".equals(ModeBox.getSelectedItem())){
                     checkMode.setText("*");
-                    pass = false;
+                    pass=false;
                 }
 
+
                 if (pass){
-                    String Subject = SubTextBox.getText();
+                    String Subject = (String) ClassNameBox.getSelectedItem();
                     String Class_type = (String) ClassTypeBox.getSelectedItem();
-                    String Student_level = (String) StudentLevelBox.getSelectedItem();
-                    Double Cos = Double.parseDouble(SubjectFeeTextField.getText());
+                    String Student_level = (String) ClassroomBox.getSelectedItem();
                     String Week = (String) WeekBox.getSelectedItem();
                     String Time = (String) TimeBox.getSelectedItem();
                     String Mode_Class = (String) ModeBox.getSelectedItem();
                     String Status = "true" ;
-                    String Teacher = TUTOR.getUsername();
+                    String Teacher_id = TUTOR.getId();
+
+                    String Subject_lower = Subject.toLowerCase();
 
                     ArrayList<Object> newClass = new ArrayList<>(Arrays.asList(
-                            Subject,
+                            Subject_lower,
                             Class_type,
                             Student_level,
-                            Cos,
                             Week,
                             Time,
                             Mode_Class,
                             Status,
-                            Teacher
+                            Teacher_id
                     ));
 
                     datamanager.addData("class.txt",newClass);
@@ -284,9 +269,197 @@ public class Tutor_UI extends JFrame {
             }
         });
 
+        EditClassButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                        set_edit_table();
+            }
+        });
+        editButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                    saveButton.setVisible(true);
+                    EditDetailFrame.setVisible(true);
+                    ArrayList<String> data = new ArrayList<>();
+
+                    EditDetailFrame.setVisible(true);
+                    ArrayList<String> data_array = get_row_data();
+
+                    Edit_ID_Text.setText(data_array.get(0));
+                    Edit_Class_Name.setText(data_array.get(1));
+
+                    String[] option_class_type = {"Lecture","Tutorial","Lab"};
+                    data.add(data_array.get(2).trim());
+                    for (String need : option_class_type) {
+                        if (!need.equalsIgnoreCase(data_array.get(2))){
+                            data.add(need);
+                        }
+                    }
+                    Edit_Class_Type.setModel(new DefaultComboBoxModel<>(data.toArray(new String[0])));
+                    data.clear();
+
+                    String[] option_classroom = {"Class 1","Class 2","Class 3","Class 4","Class 5"};
+                    data.add(data_array.get(3).trim());
+                    for (String need : option_classroom) {
+                        if (!need.equalsIgnoreCase(data_array.get(3))) {
+                            data.add(need);
+                        }
+                    }
+                    Edit_Classroom.setModel(new DefaultComboBoxModel<>(data.toArray(new String[0])));
+                    data.clear();
+
+                    String[] option_week = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+                    data.add(data_array.get(4).trim());
+                    for (String need : option_week) {
+                        if (!need.equalsIgnoreCase(data_array.get(4))) {
+                            data.add(need);
+                        }
+                    }
+
+                    Edit_Week_Box.setModel(new DefaultComboBoxModel<>(data.toArray(new String[0])));
+                    data.clear();
+
+                    String[] option_time = {"8.00-10.00", "10.00-12.00", "13.00-14.00", "14.00-16.00", "16.00-18.00"};
+                    data.add(data_array.get(5).trim());
+                    for (String need : option_time) {
+                        if (!need.equalsIgnoreCase(data_array.get(5))) {
+                            data.add(need);
+                        }
+                    }
+
+                    Edit_Time_Box.setModel(new DefaultComboBoxModel<>(data.toArray(new String[0])));
+                    data.clear();
+
+                    String[] option_mode_class = {"Online", "Physical", "Hybrid"};
+                    data.add(data_array.get(6).trim());
+                    for (String need : option_mode_class) {
+                        if (!need.equalsIgnoreCase(data_array.get(6))) {
+                            data.add(need);
+                        }
+                    }
+
+                    Edit_Mode_Class.setModel(new DefaultComboBoxModel<>(data.toArray(new String[0])));
+                    data.clear();
+            }
+        });
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                int data_place = EditTable.getSelectedRow();
+                String class_id = EditTable.getValueAt(data_place,0).toString();
+
+                String class_name = Edit_Class_Name.getText().toLowerCase();
+                String class_type = (String) Edit_Class_Type.getSelectedItem();
+                String classroom = (String) Edit_Classroom.getSelectedItem();
+                String week = (String) Edit_Week_Box.getSelectedItem();
+                String time = (String) Edit_Time_Box.getSelectedItem();
+                String class_mode = (String) Edit_Mode_Class.getSelectedItem();
+                Boolean active = true;
+                String tutor_id = TUTOR.getId();
+
+                datamanager.updateData("class.txt", new ArrayList<>(Arrays.asList(
+                        class_id,
+                        class_name,
+                        class_type,
+                        classroom,
+                        week,
+                        time,
+                        class_mode,
+                        active,
+                        tutor_id
+                )));
+                JOptionPane.showMessageDialog(null, "Update Successful");
+                saveButton.setVisible(false);
+                set_edit_table();
+                EditDetailFrame.setVisible(false);
+
+            }
+        });
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<String> data_array = get_row_data();
+                if (data_array ==null){
+                    return;
+                }
+
+                int user_result = JOptionPane.showConfirmDialog(
+                        null,
+                        "Are you sure you want to delete this record ?",
+                        "Confirm delete",
+                        JOptionPane.YES_NO_OPTION
+                );
+
+                if (user_result == JOptionPane.YES_OPTION){
+                    String class_id =data_array.get(0);
+                    String class_name = data_array.get(1);
+                    String class_type = data_array.get(2);
+                    String classroom = data_array.get(3);
+                    String week = data_array.get(4);
+                    String time =data_array.get(5);
+                    String class_mode = data_array.get(6);
+                    Boolean active = false;
+                    String tutor_id = TUTOR.getId();
+                    datamanager.updateData("class.txt",new ArrayList<>(Arrays.asList(
+                            class_id,
+                            class_name,
+                            class_type,
+                            classroom,
+                            week,
+                            time,
+                            class_mode,
+                            active,
+                            tutor_id
+                    )));
+                    JOptionPane.showMessageDialog(null,
+                            "Class ID: " + class_id + "\n" +
+                                    "Subject: " + class_name + "\n" +
+                                    "has been deleted !");
+                    set_edit_table();
+                } else{
+                    JOptionPane.showMessageDialog(null,"Delete canceled !");
+                    set_edit_table();
+                }
+            }
+        });
+
+        // set the word to gray and disappear when user type
+        Search_Bar.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (Search_Bar.getText().equals("Class ID / Subject")){
+                    Search_Bar.setText("");
+                    Search_Bar.setForeground(Color.BLACK);
+                }
+            }
+        });
+
+        Search_Bar.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (Search_Bar.getText().isEmpty()){
+                    Search_Bar.setText("Class ID / Subject");
+                    Search_Bar.setForeground(Color.lightGray);
+                }
+            }
+        });
+
+        EditEnterButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String input = Search_Bar.getText();
+                String input_lower = input.toLowerCase();
+                search_set_edit_table(input_lower);
 
 
+            }
+        });
     }
+
+
+
 
     public void UpdateProfile(){
 
@@ -387,12 +560,116 @@ public String blur_ph_number(){
     return result;
 }
 
-public void insert_data_table(){
-    DefaultTableModel tableModel =(DefaultTableModel) EditTable.getModel();
-    String [] element = {"Class ID", "Class Name","Class type", "Lecture", "Student Level", "Week", "Time", "Class Mode" };
-    tableModel.setColumnIdentifiers(element);
+public void get_subject(){
+    String id = TUTOR.getId();
+    ArrayList<String> data_string = new ArrayList<>();
+    data_string.add("< None >");
+    ArrayList<String> data = datamanager.loadData("tutor_subjects.txt");
+    for (String data_sub:data){
+        String [] data_need = data_sub.split(",");
+        if (data_need[1].equals(id)) {
+            String subject = data_need[2];
+            String subject_upper = (Character.toUpperCase(subject.charAt(0)) + subject.substring(1));
+            data_string.add(subject_upper);
 
+        }
+    }
+    String [] element_sub = data_string.toArray(new String[0]);
+    ClassNameBox.setModel(new DefaultComboBoxModel<>(element_sub));
 }
+
+    public void set_edit_table(){
+    String [] element = {"Class ID", "Subject","Class Type", "Classroom","Week", "Time","Class Mode"};
+    DefaultTableModel table = new DefaultTableModel(null, element) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+    }
+    };
+
+    String id = TUTOR.getId();
+    ArrayList<String> class_data = datamanager.loadData("class.txt");
+        for (String data_string_class : class_data) {
+            String[] data_class = data_string_class.split(",");
+            if (data_class[8].equals(id)) {
+
+                ArrayList<Object> data_needed = datamanager.getData("class.txt",data_class[0]);
+
+                if (data_needed.get(7).equals(true)) {
+                    String sub = data_class[1];
+                    String sub_upper = (Character.toUpperCase(sub.charAt(0)) + sub.substring(1));
+                    table.addRow(new Object[]{data_needed.get(0),sub_upper,data_needed.get(2),data_needed.get(3),data_needed.get(4),data_needed.get(5),data_needed.get(6)});
+                }
+             }
+        }
+        EditTable.getTableHeader().setReorderingAllowed(false);
+        EditTable.setModel(table);
+}
+
+// get selected row data
+public ArrayList<String> get_row_data(){
+        int data_place = EditTable.getSelectedRow();
+
+        if(data_place == -1){
+            JOptionPane.showMessageDialog(null, "Please select a row");
+            return null;
+        }
+
+        String class_id = EditTable.getValueAt(data_place,0).toString();
+        String class_name = EditTable.getValueAt(data_place,1).toString();
+        String class_type = EditTable.getValueAt(data_place,2).toString();
+        String classroom = EditTable.getValueAt(data_place,3).toString();
+        String week =EditTable.getValueAt(data_place,4).toString();
+        String time = EditTable.getValueAt(data_place,5).toString();
+        String class_mode = EditTable.getValueAt(data_place, 6).toString();
+
+        ArrayList<String> data_array = new ArrayList<>();
+
+        data_array.add(class_id);
+        data_array.add(class_name);
+        data_array.add(class_type);
+        data_array.add(classroom);
+        data_array.add(week);
+        data_array.add(time);
+        data_array.add(class_mode);
+
+    System.out.println(data_array);
+
+        return data_array;
+    }
+
+    public void search_set_edit_table(String input){
+        String [] element = {"Class ID", "Subject","Class Type", "Classroom","Week", "Time","Class Mode"};
+        DefaultTableModel table = new DefaultTableModel(null, element) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        ArrayList<String> class_data = datamanager.loadData("class.txt");
+
+        if (input.isEmpty() || input.equalsIgnoreCase("Class ID / Subject")){
+            set_edit_table();
+            return;
+        }
+
+        for (String data_string_class : class_data) {
+            String[] data_class = data_string_class.split(",");
+            if (data_class[0].equals(input) || data_class[1].equalsIgnoreCase(input)) {
+
+                ArrayList<Object> data_needed = datamanager.getData("class.txt",data_class[0]);
+
+                if (data_needed.get(7).equals(true)) {
+                    String sub = data_class[1];
+                    String sub_upper = (Character.toUpperCase(sub.charAt(0)) + sub.substring(1));
+                    table.addRow(new Object[]{data_needed.get(0),sub_upper,data_needed.get(2),data_needed.get(3),data_needed.get(4),data_needed.get(5),data_needed.get(6)});
+                }
+            }
+        }
+        EditTable.getTableHeader().setReorderingAllowed(false);
+        EditTable.setModel(table);
+    }
 
     public void Run(tutor system){
         TUTOR = system;
