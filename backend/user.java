@@ -41,7 +41,6 @@ public class user {
     }
 
     public String getIc() {
-        System.out.println(this.ic);
         return this.ic;
     }
 
