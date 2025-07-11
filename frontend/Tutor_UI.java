@@ -72,7 +72,11 @@ public class Tutor_UI extends JFrame {
     private JTextField Search_Bar;
     private JButton EditEnterButton;
     private JButton viewStudentButton;
-    private JTable table1;
+    private JTable Student_Table;
+    private JButton returnButton;
+    private JPanel Student_Frame;
+    private JLabel Student_Class_ID_Text;
+    private JLabel Student_Subject_Text;
     private JPanel SearchPanel;
 
     private static tutor TUTOR;
@@ -89,6 +93,7 @@ public class Tutor_UI extends JFrame {
         UpdateProfileFrame.setVisible(false);
         SearchFrame.setVisible(false);
         EditClassFrame.setVisible(false);
+        Student_Frame.setVisible(false);
 
         LogOutButton.addActionListener(new ActionListener() {
             @Override
@@ -111,6 +116,7 @@ public class Tutor_UI extends JFrame {
                 get_subject();
                 SearchFrame.setVisible(false);
                 EditDetailFrame.setVisible(false);
+                Student_Frame.setVisible(false);
             }
         });
 
@@ -124,6 +130,7 @@ public class Tutor_UI extends JFrame {
                 UpdateProfile();
                 SearchFrame.setVisible(false);
                 EditDetailFrame.setVisible(false);
+                Student_Frame.setVisible(false);
             }
         });
 
@@ -136,6 +143,7 @@ public class Tutor_UI extends JFrame {
                 SearchFrame.setVisible(true);
                 EditDetailFrame.setVisible(false);
                 saveButton.setVisible(false);
+                Student_Frame.setVisible(false);
             }
         });
 
@@ -454,6 +462,120 @@ public class Tutor_UI extends JFrame {
                 search_set_edit_table(input_lower);
 
 
+            }
+        });
+        viewStudentButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                EditClassFrame.setVisible(false);
+                Student_Frame.setVisible(true);
+                String username ="";
+                String user_id ="";
+                String class_id ="";
+                String student_id ="";
+                String stu_level ="";
+
+                String [] element = {"Student ID", "Student Name" , "Student Level"};
+                DefaultTableModel table = new DefaultTableModel(null, element) {
+                    @Override
+                    public boolean isCellEditable(int row, int column) {
+                        return false;
+                    }
+                };
+
+                ArrayList<String> row_data = get_row_data();
+                ArrayList<String> data_tutor_sub = datamanager.loadData("tutor_subjects.txt");
+                ArrayList<String> data_student_subject = datamanager.loadData("student_subjects.txt");
+                ArrayList<String> data_user = datamanager.loadData("users.txt");
+                ArrayList<String> data_tutor = datamanager.loadData("tutors.txt");
+                ArrayList<String> data_student = datamanager.loadData("students.txt");
+                ArrayList<String> data_class =datamanager.loadData("class.txt");
+                System.out.println(row_data);
+
+
+                for (String da_stu : data_student) {
+                    String[] student = da_stu.split(",");
+                    student_id = student[0];
+                    stu_level = student[1];
+
+                    boolean first_pass = false;
+                    for (String stu_sub : data_student_subject) {
+                        String[] student_subject = stu_sub.split(",");
+                        if (student_subject[2].equalsIgnoreCase(row_data.get(1)) && student_subject[1].equals(student[0])) {
+                            first_pass = true;
+                            break;
+                        }
+                    }
+
+                    if (!first_pass) continue;
+
+
+
+                    boolean second_pass =false;
+                    for (String da_tutor : data_tutor) {
+                        String[] tutor = da_tutor.split(",");
+                        if (tutor[1].equals(student[1])) {
+                            second_pass = true;
+                            break;
+                        }
+                    }
+
+                    if (!second_pass)continue;
+
+                    boolean third_pass = false;
+                    for (String da_class : data_class) {
+                        String[] classes = da_class.split(",");
+                        class_id = classes[0];
+                        if (TUTOR.getId().equals(classes[8])) {
+                            third_pass = true;
+                            break;
+                        }
+                    }
+
+                    if (!third_pass)continue;
+
+                    boolean fifth_pass = false;
+                    for (String sub: data_tutor_sub) {
+                        String[] tutor_sub = sub.split(",");
+                        if (!tutor_sub[2].equalsIgnoreCase(row_data.get(1))) continue;
+
+                        for (String da_user : data_user) {
+                            String[] user = da_user.split(",");
+
+                            if (tutor_sub[2].equalsIgnoreCase(row_data.get(1))) {
+                                if (student_id.equals(user[0])) {
+                                    username = user[1];
+                                    user_id = user[0];
+
+                                    ArrayList<Object> data_classes = datamanager.getData("class.txt", class_id);
+                                    if (data_classes.get(7).equals(true)) {
+                                        table.addRow(new String[]{user_id, username, stu_level});
+                                        fifth_pass = true;
+                                        break;
+                                    }
+
+                                }
+                            }
+
+                        }
+                        if(!fifth_pass)break;
+                    }
+                }
+
+                Student_Class_ID_Text.setText(row_data.get(0));
+                Student_Subject_Text.setText(row_data.get(1));
+                Student_Table.getTableHeader().setReorderingAllowed(false);
+                Student_Table.setModel(table);
+            }
+        });
+
+
+        returnButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                EditClassFrame.setVisible(true);
+                Student_Frame.setVisible(false);
+                set_edit_table();
             }
         });
     }
