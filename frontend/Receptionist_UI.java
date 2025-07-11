@@ -25,7 +25,6 @@ public class Receptionist_UI extends JFrame {
     private JButton ManageStudentButton;
     private JButton StudentPaymentButton;
     private JTable studentTable;
-    private JTextField studentPaymentTextField;
     private JPanel AddStudentDetails;
     private JTextField studentnamefield;
     private JComboBox studentlevel;
@@ -75,8 +74,10 @@ public class Receptionist_UI extends JFrame {
     private JButton cancelButton;
     private JPanel SubjectRequests;
     private JTable SubjectRequestsTable;
-    private JButton ApproveButton;
-    private JButton RejectButton;
+    private JButton ApproveRequestButton;
+    private JButton RejectRequestButton;
+    private JTable PaymentRequestTable;
+    private JButton AcceptPaymentButton;
 
     private static receptionist RECEPTIONIST;
 
@@ -138,6 +139,21 @@ public class Receptionist_UI extends JFrame {
                 AddStudentDetails.setVisible(true);
                 StudentPayment.setVisible(false);
                 UpdateProfile.setVisible(false);
+
+                showstudentid.setText("---");
+
+                studentnamefield.setText("");
+                studentpasswordfield.setText("");
+                studenticfield.setText("");
+                studentemailfield.setText("");
+                studentcontactnumberfield.setText("");
+                studentaddressfield.setText("");
+                studentlevel.setSelectedIndex(0);
+                malayCheckBox.setSelected(false);
+                chineseCheckBox.setSelected(false);
+                englishCheckBox.setSelected(false);
+                scienceCheckBox.setSelected(false);
+                mathematicsCheckBox.setSelected(false);
             }
         });
         EditStudentButton.addActionListener(new ActionListener() {
@@ -174,25 +190,25 @@ public class Receptionist_UI extends JFrame {
                 if (userData.get(5) == null || userData.get(5).equals("null")) {
                     studenticfield.setText("");
                 } else {
-                    studenticfield.setText(userData.get(2).toString());
+                    studenticfield.setText(userData.get(5).toString());
                 }
 
                 if (userData.get(6) == null || userData.get(6).equals("null")) {
                     studentemailfield.setText("");
                 } else {
-                    studentemailfield.setText(userData.get(2).toString());
+                    studentemailfield.setText(userData.get(6).toString());
                 }
 
                 if (userData.get(7) == null || userData.get(7).equals("null")) {
                     studentcontactnumberfield.setText("");
                 } else {
-                    studentcontactnumberfield.setText(userData.get(2).toString());
+                    studentcontactnumberfield.setText(userData.get(7).toString());
                 }
 
                 if (userData.get(8) == null || userData.get(8).equals("null")) {
                     studentaddressfield.setText("");
                 } else {
-                    studentaddressfield.setText(userData.get(2).toString());
+                    studentaddressfield.setText(userData.get(8).toString());
                 }
 
                 studentlevel.setSelectedItem(studentData.get(1).toString());
@@ -254,6 +270,7 @@ public class Receptionist_UI extends JFrame {
                 AddStudentDetails.setVisible(false);
                 StudentPayment.setVisible(true);
                 UpdateProfile.setVisible(false);
+                loadPaymentRequestTableData();
             }
         });
         UpdateProfileButton.addActionListener(new ActionListener() {
@@ -384,9 +401,7 @@ public class Receptionist_UI extends JFrame {
 
                     ArrayList<Object> student_Data = new ArrayList<>(Arrays.asList(
                             student_new_id,
-                            selected_level,
-                            subjects.size() * 100,
-                            0
+                            selected_level
                     ));
 
                     datamanager.addLine("students.txt", student_Data);
@@ -402,8 +417,9 @@ public class Receptionist_UI extends JFrame {
                         ArrayList<Object> subject_Data = new ArrayList<>(Arrays.asList(
                                 student_new_id,
                                 each_subject,
-                                currentMonth
-                                ));
+                                currentMonth,
+                                "100"
+                        ));
 
                         datamanager.addData("student_subjects.txt",subject_Data);
                         System.out.println(subject_Data);
@@ -412,7 +428,25 @@ public class Receptionist_UI extends JFrame {
                 } else {
                     String studentID = showstudentid.getText();
 
+                    if (ic.isEmpty()) {
+                        ic = "null";
+                    }
+
+                    if (address.isEmpty()) {
+                        address = "null";
+                    }
+
+                    if (contact_number.isEmpty()) {
+                        contact_number = "null";
+                    }
+
+                    if (email.isEmpty()) {
+                        email = "null";
+                    }
+
+
                     ArrayList<Object> userData = new ArrayList<>(Arrays.asList(
+                            studentID,
                             username,
                             password,
                             true,
@@ -427,17 +461,49 @@ public class Receptionist_UI extends JFrame {
 
                     ArrayList<Object> studentData = new ArrayList<>(Arrays.asList(
                             studentID,
-                            selected_level,
-                            subjects.size() * 100,
-                            0
+                            selected_level
                     ));
 
                     datamanager.updateData("students.txt", studentData);
 
+                    ArrayList<String> oldsubjects = new ArrayList<>();
+                    ArrayList<String> newsubjects = subjects;
+                    String currentMonth = LocalDate.now()
+                            .getMonth()
+                            .getDisplayName(TextStyle.FULL, Locale.ENGLISH)
+                            .toLowerCase();
 
+                    for (String line : datamanager.loadData("student_subjects.txt")) {
+                        String [] subject_data = line.split(",");
+
+                        if (subject_data.length != 5) {
+                            continue;
+                        }
+
+                        if (subject_data[1].equalsIgnoreCase(studentID)){
+                            oldsubjects.add(subject_data[2].toLowerCase());
+
+                            if (!newsubjects.contains(subject_data[2])){
+                                datamanager.deleteData("student_subjects.txt", subject_data[0]);
+                            }
+                        }
+                    }
+
+                    for (String subject : newsubjects) {
+                        if (!oldsubjects.contains(subject)) {
+                            ArrayList<Object> subject_Data = new ArrayList<>(Arrays.asList(
+                                    studentID,
+                                    subject,
+                                    currentMonth,
+                                    "100"
+                            ));
+                            datamanager.addData("student_subjects.txt",subject_Data);
+                        }
+                    }
 
                     JOptionPane.showMessageDialog(null, "Student successfully updated!");
-                    }
+                }
+
                 StudentDetailTable.setVisible(true);
                 SubjectRequests.setVisible(false);
                 AddStudentDetails.setVisible(false);
@@ -467,7 +533,7 @@ public class Receptionist_UI extends JFrame {
             }
         });
 
-        ApproveButton.addActionListener(new ActionListener() {
+        ApproveRequestButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = SubjectRequestsTable.getSelectedRow();
@@ -488,6 +554,7 @@ public class Receptionist_UI extends JFrame {
 
                     if (user_data[1].equalsIgnoreCase(StudentUsername)) {
                         StudentID = user_data[0];
+                        break;
                     }
                 }
 
@@ -502,7 +569,7 @@ public class Receptionist_UI extends JFrame {
                 for (String subject_line : datamanager.loadData("student_subjects.txt")) {
                     String[] subject_data = subject_line.split(",");
 
-                    if (subject_data.length == 4 && subject_data[1].equals(StudentID) && subject_data[2].equalsIgnoreCase(OldSubject)) {
+                    if (subject_data.length == 5 && subject_data[1].equals(StudentID) && subject_data[2].equalsIgnoreCase(OldSubject)) {
                         student_subjects_id = subject_data[0];
                         student_subjects_month = subject_data[3];
                     }
@@ -531,7 +598,7 @@ public class Receptionist_UI extends JFrame {
                 loadStudentTableData();
             }
         });
-        RejectButton.addActionListener(new ActionListener() {
+        RejectRequestButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = SubjectRequestsTable.getSelectedRow();
@@ -547,6 +614,75 @@ public class Receptionist_UI extends JFrame {
                 JOptionPane.showMessageDialog(null, "Subject successfully rejected!");
                 loadSubjectRequestsTableData();
 
+            }
+        });
+        AcceptPaymentButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = PaymentRequestTable.getSelectedRow();
+
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(null, "Please select a row from the table first.");
+                    return;
+                }
+
+                String RequestID = PaymentRequestTable.getValueAt(selectedRow, 0).toString();
+                String StudentUsername = PaymentRequestTable.getValueAt(selectedRow, 1).toString();
+                String Amount = PaymentRequestTable.getValueAt(selectedRow, 2).toString();
+                String Subject = PaymentRequestTable.getValueAt(selectedRow, 3).toString();
+
+                String StudentID = "";
+                for (String user_line : datamanager.loadData("users.txt")) {
+                    String[] user_data = user_line.split(",");
+
+                    if (user_data[1].equalsIgnoreCase(StudentUsername)) {
+                        StudentID = user_data[0];
+                        break;
+                    }
+                }
+
+                if (StudentID.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Student not found.");
+                    return;
+                }
+
+                int amount = Integer.parseInt(Amount);
+                int total_paid = 0;
+                int total_fees = 0;
+
+                for (String subject_line : datamanager.loadData("student_subjects.txt")) {
+                    String[] subject_data = subject_line.split(",");
+
+                    if (subject_data.length == 5 && subject_data[1].equals(StudentID) && subject_data[2].equalsIgnoreCase(Subject)) {
+                        total_fees = Integer.parseInt(subject_data[4]);
+                        break;
+                    }
+                }
+
+                for (String receipt_line : datamanager.loadData("student_receipts.txt")) {
+                    String[] receipt_data = receipt_line.split(",");
+
+                    if (receipt_data.length == 4 && receipt_data[1].equals(StudentID) && receipt_data[3].equalsIgnoreCase(Subject)) {
+                        total_paid += Integer.parseInt(receipt_data[2]);
+                    }
+                }
+
+                if (total_paid + amount > total_fees) {
+                    JOptionPane.showMessageDialog(null, "Payment exceeds owed fees for subject "+Subject);
+                    return;
+                }
+
+                ArrayList<Object> receipt  = new ArrayList<>(Arrays.asList(
+                        StudentID,
+                        amount,
+                        Subject
+                ));
+
+                datamanager.addData("student_receipts.txt", receipt);
+                datamanager.deleteData("payment_requests.txt", RequestID);
+
+                JOptionPane.showMessageDialog(null, "Payment successfully accepted!");
+                loadPaymentRequestTableData();
             }
         });
     }
@@ -633,6 +769,42 @@ public class Receptionist_UI extends JFrame {
         autoResizeTableColumns(SubjectRequestsTable);
     }
 
+    public void loadPaymentRequestTableData() {
+        String[] columnName = {"ID", "Student Name", "Amount", "Subject"};
+
+        DefaultTableModel model = new DefaultTableModel(null, columnName) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        for (String request_data : datamanager.loadData("payment_requests.txt")) {
+            String[] request_data_split = request_data.split(",");
+
+            if (request_data_split.length == 4) {
+                String RequestID = request_data_split[0];
+                String StudentID = request_data_split[1];
+                String Amount = request_data_split[2];
+                String Subject = request_data_split[3];
+
+                ArrayList<Object> student_Data = datamanager.getData("users.txt", StudentID);
+
+                if (student_Data.size() < 4 || student_Data.get(3).equals(false)) {
+                    continue;
+                }
+
+                String StudentUsername = student_Data.get(1).toString();
+                model.addRow(new Object[]{RequestID, StudentUsername, Amount, Subject});
+            }
+        }
+
+        PaymentRequestTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        PaymentRequestTable.getTableHeader().setResizingAllowed(false);
+        PaymentRequestTable.setModel(model);
+        autoResizeTableColumns(PaymentRequestTable);
+    }
+
+
     public static void autoResizeTableColumns(JTable table) {
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -649,11 +821,11 @@ public class Receptionist_UI extends JFrame {
     }
 
     public void Run (receptionist system){
-            RECEPTIONIST = system;
-            WelcomeTitle.setText("Hello, " + RECEPTIONIST.getUsername() + " !");
+        RECEPTIONIST = system;
+        WelcomeTitle.setText("Hello, " + RECEPTIONIST.getUsername() + " !");
     }
 
     public static void main (String[] args){
-            Receptionist_UI ui = new Receptionist_UI();
+        Receptionist_UI ui = new Receptionist_UI();
     }
 }
