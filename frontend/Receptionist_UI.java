@@ -289,6 +289,9 @@ public class Receptionist_UI extends JFrame {
                 ReceptionistEmailTF.setVisible(false);
                 ReceptionistContactTF.setVisible(false);
                 UpdateCancelButtons.setVisible(false);
+                EditProfileButton.setVisible(true);
+                UpdateButton.setVisible(false);
+                UpdateProfile();
             }
         });
         EditProfileButton.addActionListener(new ActionListener() {
@@ -308,6 +311,8 @@ public class Receptionist_UI extends JFrame {
                 AddressField.setVisible(false);
                 EmailField.setVisible(false);
                 ContactField.setVisible(false);
+                EditProfileButton.setVisible(false);
+                UpdateButton.setVisible(true);
                 UpdateProfile();
             }
         });
@@ -705,7 +710,11 @@ public class Receptionist_UI extends JFrame {
                         address
                 );
 
+                UpdateProfile();
+                JOptionPane.showMessageDialog(null,"Update Successful");
             }
+
+
         });
         CancelUpdateButton.addActionListener(new ActionListener() {
             @Override
@@ -724,25 +733,20 @@ public class Receptionist_UI extends JFrame {
                 AddressField.setVisible(true);
                 EmailField.setVisible(true);
                 ContactField.setVisible(true);
+                EditProfileButton.setVisible(true);
+                UpdateButton.setVisible(false);
+                UpdateProfile();
             }
         });
     }
 
     public void UpdateProfile(){
-        String id = RECEPTIONIST.getId();
-        ArrayList<Object> receptionist_data = datamanager.getData("users.txt", id);
-
-        if (receptionist_data.size() < 9 || receptionist_data.get(3).equals(false)) {
-            JOptionPane.showMessageDialog(null, "Receptionist data not found or corrupted.");
-            return;
-        }
-
-        String username = receptionist_data.get(1).toString();
-        String password = receptionist_data.get(2).toString();
-        String ic = receptionist_data.get(5).toString();
-        String email = receptionist_data.get(6).toString();
-        String contact = receptionist_data.get(7).toString();
-        String address = receptionist_data.get(8).toString();
+        String username = RECEPTIONIST.getUsername();
+        String password = RECEPTIONIST.getPassword();
+        String ic = RECEPTIONIST.getIc();
+        String email = RECEPTIONIST.getEmail();
+        String contact = RECEPTIONIST.getContact_number();
+        String address = RECEPTIONIST.getAddress();
 
         if (UpdateButton.isVisible()){
             ReceptionistUsernameTF.setText(username);
