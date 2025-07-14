@@ -249,7 +249,7 @@ public class Receptionist_UI extends JFrame {
                 String studentID = studentTable.getValueAt(selectedRow, 0).toString();
 
                 ArrayList<Object> userData = datamanager.getData("users.txt", studentID);
-                if (userData.size() < 4 || userData.get(3).equals(false)) {
+                if (userData.size() < 9 || userData.get(3).equals(false)) {
                     JOptionPane.showMessageDialog(null, "Student data not found or corrupted.");
                     return;
                 }
@@ -685,9 +685,114 @@ public class Receptionist_UI extends JFrame {
                 loadPaymentRequestTableData();
             }
         });
+        UpdateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String id = RECEPTIONIST.getId();
+                String username = ReceptionistUsernameTF.getText().trim();
+                String password = ReceptionistPasswordTF.getText().trim();
+                String ic = ReceptionistICTF.getText().trim();
+                String address = ReceptionistAddressTF.getText().trim();
+                String email = ReceptionistEmailTF.getText().trim();
+                String contact = ReceptionistContactTF.getText().trim();
+
+                String profile = RECEPTIONIST.UpdateProfile(
+                        username,
+                        password,
+                        ic,
+                        email,
+                        contact,
+                        address
+                );
+
+            }
+        });
+        CancelUpdateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ReceptionistUsernameTF.setVisible(false);
+                ReceptionistPasswordTF.setVisible(false);
+                ReceptionistICTF.setVisible(false);
+                ReceptionistAddressTF.setVisible(false);
+                ReceptionistEmailTF.setVisible(false);
+                ReceptionistContactTF.setVisible(false);
+                UpdateCancelButtons.setVisible(false);
+
+                UsernameField.setVisible(true);
+                PasswordField.setVisible(true);
+                ICField.setVisible(true);
+                AddressField.setVisible(true);
+                EmailField.setVisible(true);
+                ContactField.setVisible(true);
+            }
+        });
     }
 
     public void UpdateProfile(){
+        String id = RECEPTIONIST.getId();
+        ArrayList<Object> receptionist_data = datamanager.getData("users.txt", id);
+
+        if (receptionist_data.size() < 9 || receptionist_data.get(3).equals(false)) {
+            JOptionPane.showMessageDialog(null, "Receptionist data not found or corrupted.");
+            return;
+        }
+
+        String username = receptionist_data.get(1).toString();
+        String password = receptionist_data.get(2).toString();
+        String ic = receptionist_data.get(5).toString();
+        String email = receptionist_data.get(6).toString();
+        String contact = receptionist_data.get(7).toString();
+        String address = receptionist_data.get(8).toString();
+
+        if (UpdateButton.isVisible()){
+            ReceptionistUsernameTF.setText(username);
+            ReceptionistPasswordTF.setText(password);
+
+            if (ic.equalsIgnoreCase("null")) {
+                ReceptionistICTF.setText("");
+            } else {
+                ReceptionistICTF.setText(ic);
+            }
+            if (address.equalsIgnoreCase("null")) {
+                ReceptionistAddressTF.setText("");
+            } else {
+                ReceptionistICTF.setText(address);
+            }
+            if (email.equalsIgnoreCase("null")) {
+                ReceptionistEmailTF.setText("");
+            } else {
+                ReceptionistEmailTF.setText(email);
+            }
+            if (contact.equalsIgnoreCase("null")) {
+                ReceptionistContactTF.setText("");
+            } else {
+                ReceptionistContactTF.setText(contact);
+            }
+        } else {
+            UsernameField.setText(username);
+            PasswordField.setText(password);
+
+            if (ic.equalsIgnoreCase("null")) {
+                ICField.setText("----");
+            } else {
+                ICField.setText(ic);
+            }
+            if (address.equalsIgnoreCase("null")) {
+                AddressField.setText("----");
+            } else {
+                AddressField.setText(address);
+            }
+            if (email.equalsIgnoreCase("null")) {
+                EmailField.setText("----");
+            } else {
+                EmailField.setText(email);
+            }
+            if (contact.equalsIgnoreCase("null")) {
+                ContactField.setText("----");
+            } else {
+                ContactField.setText(contact);
+            }
+        }
 
     }
 
@@ -754,8 +859,9 @@ public class Receptionist_UI extends JFrame {
 
                 ArrayList<Object> student_personal_Data = datamanager.getData("users.txt", StudentID);
 
-                if (student_personal_Data.size() < 4 || student_personal_Data.get(3).equals(false)) {
-                    continue;
+                if (student_personal_Data.size() < 9 || student_personal_Data.get(3).equals(false)) {
+                    JOptionPane.showMessageDialog(null, "Student data not found or corrupted.");
+                    return;
                 }
 
                 String StudentUsername = student_personal_Data.get(1).toString();
@@ -789,8 +895,9 @@ public class Receptionist_UI extends JFrame {
 
                 ArrayList<Object> student_Data = datamanager.getData("users.txt", StudentID);
 
-                if (student_Data.size() < 4 || student_Data.get(3).equals(false)) {
-                    continue;
+                if (student_Data.size() < 9 || student_Data.get(3).equals(false)) {
+                    JOptionPane.showMessageDialog(null, "Student data not found or corrupted.");
+                    return;
                 }
 
                 String StudentUsername = student_Data.get(1).toString();
