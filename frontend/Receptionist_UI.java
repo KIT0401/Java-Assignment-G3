@@ -282,6 +282,12 @@ public class Receptionist_UI extends JFrame {
                 StudentPayment.setVisible(false);
                 UpdateProfile.setVisible(true);
 
+                UsernameField.setVisible(true);
+                PasswordField.setVisible(true);
+                ICField.setVisible(true);
+                AddressField.setVisible(true);
+                EmailField.setVisible(true);
+                ContactField.setVisible(true);
                 ReceptionistUsernameTF.setVisible(false);
                 ReceptionistPasswordTF.setVisible(false);
                 ReceptionistICTF.setVisible(false);
