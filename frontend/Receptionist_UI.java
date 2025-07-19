@@ -707,7 +707,7 @@ public class Receptionist_UI extends JFrame {
                 String email = ReceptionistEmailTF.getText().trim();
                 String contact = ReceptionistContactTF.getText().trim();
 
-                String profile = RECEPTIONIST.UpdateProfile(
+                RECEPTIONIST.UpdateProfile(
                         username,
                         password,
                         ic,
@@ -716,8 +716,25 @@ public class Receptionist_UI extends JFrame {
                         address
                 );
 
-                UpdateProfile();
                 JOptionPane.showMessageDialog(null,"Update Successful");
+
+                ReceptionistUsernameTF.setVisible(false);
+                ReceptionistPasswordTF.setVisible(false);
+                ReceptionistICTF.setVisible(false);
+                ReceptionistAddressTF.setVisible(false);
+                ReceptionistEmailTF.setVisible(false);
+                ReceptionistContactTF.setVisible(false);
+                UpdateCancelButtons.setVisible(false);
+
+                UsernameField.setVisible(true);
+                PasswordField.setVisible(true);
+                ICField.setVisible(true);
+                AddressField.setVisible(true);
+                EmailField.setVisible(true);
+                ContactField.setVisible(true);
+                EditProfileButton.setVisible(true);
+                UpdateButton.setVisible(false);
+                UpdateProfile();
             }
 
 
@@ -766,7 +783,7 @@ public class Receptionist_UI extends JFrame {
             if (address.equalsIgnoreCase("null")) {
                 ReceptionistAddressTF.setText("");
             } else {
-                ReceptionistICTF.setText(address);
+                ReceptionistAddressTF.setText(address);
             }
             if (email.equalsIgnoreCase("null")) {
                 ReceptionistEmailTF.setText("");
