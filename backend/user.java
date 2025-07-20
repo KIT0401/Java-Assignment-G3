@@ -60,8 +60,20 @@ public class user {
         this.username = username;
     }
 
-    public String getId(){
+    public String getId() {
         return this.id;
+    }
+
+    public void setIc(String ic){
+        this.ic = ic;
+    }
+
+    public void setEmail(String email){
+        this.email = email;
+    }
+
+    public void setContact(String contact_number){
+        this.contact_number = contact_number;
     }
 
     public String UpdateProfile(String username,String password, String ic, String email, String contact_number, String address){
